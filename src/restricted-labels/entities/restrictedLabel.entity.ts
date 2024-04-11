@@ -1,5 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEnum, IsString } from "class-validator";
+import { Document, WithId } from "mongodb";
+import { typeList } from "./typeList.entity";
 
 export class RestrictedLabel {
     @ApiProperty({ description:"RestrictedLabel Unique identifier" })
@@ -10,8 +12,14 @@ export class RestrictedLabel {
     @IsString()
     name:string;
     
-    @ApiProperty({ description:"Type of label" })
+    @ApiProperty({ enum:typeList, description:"Type of label" })
     @IsString()
-    @IsEnum(['Code','Repository','FreeLabel'])
+    @IsEnum(typeList)
     type:string;
+
+    constructor(doc?:WithId<Document>) {
+        this.id = doc?._id.toString();
+        this.name = doc?.name;
+        this.type = doc?.type;
+    }
 }

@@ -8,10 +8,9 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
 
   const config = new DocumentBuilder()
-    .setTitle('Ninja API')
-    .setDescription('My very first swagger with nest')
+    .setTitle('Snippets Share API')
+    .setDescription('Api for the Snippets Share app')
     .setVersion('1.0')
-    .addTag('Ninja')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('swagger-api', app, document);

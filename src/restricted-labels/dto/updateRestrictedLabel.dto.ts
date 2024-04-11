@@ -9,4 +9,9 @@ export class updateRestrictedLabel {
     @ApiProperty({ description:"Name of the label" })
     @IsString()
     name:string;
+
+    constructor(id?:string, name?:string) {
+        this.id = id;
+        this.name = name;
+    }
 }
