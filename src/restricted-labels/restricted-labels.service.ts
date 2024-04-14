@@ -1,4 +1,4 @@
-import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { HttpException, Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { RestrictedLabel } from './entities/restrictedLabel.entity';
 import { updateRestrictedLabel } from './dto/updateRestrictedLabel.dto';
 import { Db, DeleteResult, Document, Filter, InsertOneResult, ObjectId, UpdateResult, WithId } from 'mongodb';
@@ -57,9 +57,12 @@ export class RestrictedLabelsService {
     try {
       let value:UpdateResult<Document> = await this.db.collection('RestrictedLabel').updateOne({ _id: new ObjectId(id) }, { $set: { name: name }})
       if (value.acknowledged && value.matchedCount == 1) return new updateRestrictedLabel(id, name);
-      else throw 'Cannot found any restrictedLabel to update';
+      else throw new NotFoundException('Cannot found any restrictedLabel to update');
     }
-    catch (err) { throw new InternalServerErrorException(err); };
+    catch (err) { 
+      if (err instanceof HttpException) throw err;
+      else throw new InternalServerErrorException(err); 
+    };
   }
   
   /**
@@ -69,9 +72,12 @@ export class RestrictedLabelsService {
   async deleteRestrictedLabel(id:string): Promise<void> {
     try {
       let value:DeleteResult = await this.db.collection('RestrictedLabel').deleteOne({ _id: new ObjectId(id) });
-      if (!value.acknowledged || value.deletedCount == 0) throw 'Cannot found any restrictedLabel to delete';
+      if (!value.acknowledged || value.deletedCount == 0) throw new NotFoundException('Cannot found any restrictedLabel to delete');
     }
-    catch (err) { throw new InternalServerErrorException(err) };
+    catch (err) { 
+      if (err instanceof HttpException) throw err;
+      else throw new InternalServerErrorException(err); 
+    };
   }
 
   /**
