@@ -17,7 +17,7 @@ describe('RestrictedLabelsController', () => {
   ];
   let usedRestrictedLabelList: RestrictedLabel[];
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [RestrictedLabelsController],
       providers: [RestrictedLabelsService],
