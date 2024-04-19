@@ -1,9 +1,15 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEmail, IsEnum, IsNotEmpty, IsString } from "class-validator";
+import { Document, WithId } from "mongodb";
 import { UserRoleList } from "../entities/userRoleList.entity";
 import { UserStatusList } from "../entities/userStatusList.entity";
 
-export class UpdateFullUser {
+export class GetUser {
+    @ApiProperty({ description:"User Unique identifier" })
+    @IsString()
+    @IsNotEmpty()
+    id: string;
+    
     @ApiProperty({ description:"User UserName" })
     @IsString()
     @IsNotEmpty()
@@ -25,4 +31,12 @@ export class UpdateFullUser {
     @IsEnum(UserStatusList)
     @IsNotEmpty()
     status:string;
+
+    initWithMongoObject(doc:WithId<Document>): void {
+        this.id = doc._id.toString();
+        this.userName = doc.userName;
+        this.eMail = doc.eMail;
+        this.role = doc.role;
+        this.status = doc.status;
+    }
 }

@@ -1,11 +1,11 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, ValidationPipe } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApiBody, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { User } from './entities/user.entity';
-import { updateFullUser } from './dto/updateFullUser.dto';
-import { addUser } from './dto/addUser.dto';
+import { UpdateFullUser } from './dto/updateFullUser.dto';
+import { AddUser } from './dto/addUser.dto';
 import { UserStatusList } from './entities/userStatusList.entity';
 import { UserRoleList } from './entities/userRoleList.entity';
+import { GetUser } from './dto/getUser.dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -15,9 +15,9 @@ export class UsersController {
   @Get('/:id')
   @ApiOperation({ summary: 'Get a single User by his Id' })
   @ApiParam({ name:'id', description: 'Id of the user to get', required: true })
-  @ApiOkResponse({ type: User })
+  @ApiOkResponse({ type: GetUser })
   @ApiNotFoundResponse({ description: 'If unable to find the user id' })
-  getUser(@Param('id') id:string) : Promise<User> {
+  getUser(@Param('id') id:string) : Promise<GetUser> {
     return null;
   }
 
@@ -26,8 +26,8 @@ export class UsersController {
   @ApiQuery({ name:'searchText', description: 'partial search into UserName AND EMails', required: false })
   @ApiQuery({ name:'role', description: 'Exact role to filter on', required: false, enum: UserRoleList })
   @ApiQuery({ name:'status', description: 'Exact statut to filter on', required: false, enum: UserStatusList })
-  @ApiOkResponse({ type: [User] })
-  getUsers(@Query('searchText') searchText?:string, @Query('role') role?:Array<UserRoleList>, @Query('status') status?:Array<UserStatusList>) : Promise<Array<User>> {
+  @ApiOkResponse({ type: [GetUser] })
+  getUsers(@Query('searchText') searchText?:string, @Query('role') role?:Array<UserRoleList>, @Query('status') status?:Array<UserStatusList>) : Promise<Array<GetUser>> {
     return null;
   }
 
@@ -35,7 +35,7 @@ export class UsersController {
   @ApiOperation({ summary: 'To create a new user' })
   @ApiBody({ required: true} )
   @ApiOkResponse({ description:'Return the generated Id of the new element', type: String })
-  addUser(@Body(new ValidationPipe({expectedType:User})) user:addUser) : Promise<string> {
+  addUser(@Body(new ValidationPipe({expectedType:AddUser})) user:AddUser) : Promise<string> {
     //ToDo (Send mail to Activate)
     return null;
   }
@@ -44,9 +44,9 @@ export class UsersController {
   @ApiOperation({ summary: 'To fully update a user properties (Admin Only)' })
   @ApiParam({ name:'id', description: 'Id of the user to update', required: true })
   @ApiBody({ required: true} )
-  @ApiOkResponse({ description:'Return the update object', type: updateFullUser })
+  @ApiOkResponse({ description:'Return the update object', type: UpdateFullUser })
   @ApiNotFoundResponse({ description: 'If unable to find the user id' })
-  updateUser(@Param('id') id:string, @Body(new ValidationPipe({expectedType:updateFullUser})) user:updateFullUser) : Promise<updateFullUser> {
+  updateUser(@Param('id') id:string, @Body(new ValidationPipe({expectedType:UpdateFullUser})) user:UpdateFullUser) : Promise<UpdateFullUser> {
     return null;
   }
 
