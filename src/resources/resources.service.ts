@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { typeList } from './entities/typeList.entity';
+import { UserRoleList } from './entities/userRoleList.entity';
+import { UserStatusList } from './entities/userStatusList.entity';
 
 @Injectable()
 export class ResourcesService {
@@ -11,11 +13,19 @@ export class ResourcesService {
     return Object.values(typeList);
   }
 
+  /**
+   * get all User Roles
+   * @returns List of User Roles (from enum)
+   */
   getUserRoles() : Array<string> {
-      return ['zef','zef'];
+      return Object.values(UserRoleList);
   }
 
+  /**
+   * get all User Status
+   * @returns List of User Status (from enum)
+   */
   getUserStatus() : Array<string> {
-      return ['ef','zef','zef','zef'];
+      return Object.values(UserStatusList);
   }
 }
