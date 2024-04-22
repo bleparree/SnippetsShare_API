@@ -258,35 +258,18 @@ describe('UsersController', () => {
     mock.mockClear();
   })
 
-  describe('getUserRoles test cases', () => {
-    it('Call should return a 200',async () => {
-      await supertest(app.getHttpServer()).get('/users/roles').expect(200).then((res) => {
-        console.log(res.body);
-        expect(res.body.length).toBe(2);
+  describe('MongoDb is off', () => {
+    it("Call should return a 500", async () => {
+      const mock500 = jest.spyOn(usersService, 'getUser');
+      mock500.mockImplementation((id:string) => { 
+        throw new InternalServerErrorException('pas content');
       });
+      await supertest(app.getHttpServer()).get(`/users/nomongo`)
+        .expect(500).then((res) => {
+          expect(res.body.error).toBe('Internal Server Error');
+          expect(res.body.message).toBe('pas content')
+        });
+      mock500.mockClear();
     });
   });
-
-  // describe('getUserStatus test cases', () => {
-  //   it('Call should return a 200', () => {
-  //     supertest(app.getHttpServer()).get('/users/status').expect(200).then((res) => {
-  //       expect(res.body.length).toBe(4);
-  //     });
-  //   });
-  // });
-
-  // describe('MongoDb is off', () => {
-  //   it("Call should return a 500", async () => {
-  //     const mock500 = jest.spyOn(usersService, 'getUser');
-  //     mock500.mockImplementation((id:string) => { 
-  //       throw new InternalServerErrorException('pas content');
-  //     });
-  //     await supertest(app.getHttpServer()).get(`/users/nomongo`)
-  //       .expect(500).then((res) => {
-  //         expect(res.body.error).toBe('Internal Server Error');
-  //         expect(res.body.message).toBe('pas content')
-  //       });
-  //     mock500.mockClear();
-  //   });
-  // });
 });

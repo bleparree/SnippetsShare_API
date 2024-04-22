@@ -1,8 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEmail, IsEnum, IsNotEmpty, IsString } from "class-validator";
 import { Document, WithId } from "mongodb";
-import { UserRoleList } from "../entities/userRoleList.entity";
-import { UserStatusList } from "../entities/userStatusList.entity";
+import { UserRoleList } from "src/resources/entities/userRoleList.entity";
+import { UserStatusList } from "src/resources/entities/userStatusList.entity";
 
 export class GetUser {
     @ApiProperty({ description:"User Unique identifier" })

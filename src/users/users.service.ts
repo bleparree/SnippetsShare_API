@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Db } from 'mongodb';
 import { GetUser } from './dto/getUser.dto';
-import { UserRoleList } from './entities/userRoleList.entity';
-import { UserStatusList } from './entities/userStatusList.entity';
+import { UserRoleList } from 'src/resources/entities/userRoleList.entity';
+import { UserStatusList } from 'src/resources/entities/userStatusList.entity';
 import { AddUser } from './dto/addUser.dto';
 import { UpdateFullUser } from './dto/updateFullUser.dto';
 
@@ -45,13 +45,5 @@ export class UsersService {
 
     deleteUser(id:string) : Promise<void> {
         return null;
-    }
-
-    getUserRoles() : Array<string> {
-        return ['zef','zef'];
-    }
-
-    getUserStatus() : Array<string> {
-        return ['ef','zef','zef','zef'];
     }
 }

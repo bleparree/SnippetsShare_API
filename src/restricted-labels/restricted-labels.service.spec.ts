@@ -159,14 +159,6 @@ describe('RestrictedLabelsService', () => {
     });
   });
 
-  describe('getRestrictedLabelTypes', () => {
-    it('Test to get Label Types',async () => {
-      const res = service.getRestrictedLabelTypes();
-      expect(res).toBeDefined();
-      expect(res.length).toBeGreaterThanOrEqual(1);
-    });
-  });
-
   describe('Without MongoDb Connection',() => {
     it('getRestrictedLabels return 500',async () => {
       mockMongoConnectionOff();

@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEnum, IsString } from "class-validator";
 import { Document, WithId } from "mongodb";
-import { typeList } from "./typeList.entity";
+import { typeList } from "src/resources/entities/typeList.entity";
 
 export class RestrictedLabel {
     @ApiProperty({ description:"RestrictedLabel Unique identifier" })

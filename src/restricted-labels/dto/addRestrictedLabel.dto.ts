@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEnum, IsString, IsNotEmpty } from "class-validator";
-import { typeList } from "../entities/typeList.entity";
+import { typeList } from "src/resources/entities/typeList.entity";
 
 export class addRestrictedLabel {
     @ApiProperty({ description:"Name of the label" })

@@ -3,8 +3,8 @@ import { UsersService } from './users.service';
 import { ApiBody, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { UpdateFullUser } from './dto/updateFullUser.dto';
 import { AddUser } from './dto/addUser.dto';
-import { UserStatusList } from './entities/userStatusList.entity';
-import { UserRoleList } from './entities/userRoleList.entity';
+import { UserStatusList } from 'src/resources/entities/userStatusList.entity';
+import { UserRoleList } from 'src/resources/entities/userRoleList.entity';
 import { GetUser } from './dto/getUser.dto';
 
 @ApiTags('Users')
@@ -98,19 +98,5 @@ export class UsersController {
   @ApiNotFoundResponse({ description: 'If unable to find the user id' })
   deleteUser(@Param('id') id:string) : Promise<void> {
     return this.usersService.deleteUser(id);
-  }
-  
-  @Get('/roles')
-  @ApiOperation({ summary: 'Get all the possible User Role' })
-  @ApiOkResponse({ description:'Return the complete list of User Roles', type: Array<String> })
-  getUserRoles() : Array<string> {
-    return this.usersService.getUserRoles();
-  }
-
-  @Get('/status')
-  @ApiOperation({ summary: 'Get all the possible User status' })
-  @ApiOkResponse({ description:'Return the complete list of Users Status', type: Array<String> })
-  getUserStatus() : Array<string> {
-    return this.usersService.getUserStatus();
   }
 }

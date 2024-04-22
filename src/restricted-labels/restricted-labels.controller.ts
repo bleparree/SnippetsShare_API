@@ -2,7 +2,7 @@ import { BadRequestException, Body, Controller, Delete, Get, HttpCode, Param, Po
 import { RestrictedLabelsService } from './restricted-labels.service';
 import { RestrictedLabel } from './entities/restrictedLabel.entity';
 import { updateRestrictedLabel } from './dto/updateRestrictedLabel.dto';
-import { ApiBody, ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { addRestrictedLabel } from './dto/addRestrictedLabel.dto';
 
 @ApiTags('RestrictedLabels')
@@ -43,12 +43,5 @@ export class RestrictedLabelsController {
   @HttpCode(204)
   async deleteRestrictedLabel(@Param('id') id:string): Promise<void> {
     await this.restrictedLabelsService.deleteRestrictedLabel(id);
-  }
-
-  @Get('/types')
-  @ApiOperation({ summary: 'Get All the restricted labels types (enum)' })
-  @ApiOkResponse({ description:'Return the complete list of RLabel Type', type: Array<String> })
-  getRestrictedLabelTypes() : Array<string> {
-    return this.restrictedLabelsService.getRestrictedLabelTypes();
   }
 }
