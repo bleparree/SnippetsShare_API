@@ -1,10 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
-import { User } from './entities/user.entity';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, InternalServerErrorException } from '@nestjs/common';
 import { GetUser } from './dto/getUser.dto';
 import supertest from 'supertest';
+import { AddUser } from './dto/addUser.dto';
+import { UpdateFullUser } from './dto/updateFullUser.dto';
 
 describe('UsersController', () => {
   let controller: UsersController;
@@ -38,67 +39,254 @@ describe('UsersController', () => {
   });
 
   describe('getUser test cases', () => {
-    // const mock = jest.spyOn(usersService, 'getRestrictedLabels');
-    // mock.mockImplementation((name?:string, type?:string) => { 
-    //   return new Promise((resolve, reject) => { 
-    //     resolve(userList)
-    //   }); 
-    // });
+    const mock = jest.spyOn(usersService, 'getUser');
+    mock.mockImplementation((id:string) => { 
+      return new Promise((resolve, reject) => { 
+        resolve(userList[0])
+      }); 
+    });
     it("Call should return 200", async () => {
-      // await getrestrictedLabelSuperTest(`/restricted-labels`, usedRestrictedLabelList);
+      await supertest(app.getHttpServer()).get('/users/12').expect(200)
+        .then((res) => {
+            expect(res.body.id).toBe(userList[0].id);
+            expect(res.body.eMail).toBe(userList[0].eMail);
+            expect(res.body.userName).toBe(userList[0].userName);
+        });
     });
   })
 
   describe('getUsers test cases', () => {
-    it("Call without param should return 200", async () => {});
-    it("Call with query search return 200", async () => {});
-    it("Call with query role return 200", async () => {});
-    it("Call with query status return 200", async () => {});
-    it("Call with all param return 200", async () => {});
+    const mock = jest.spyOn(usersService, 'getUsers');
+    mock.mockImplementation((id:string) => { 
+      return new Promise((resolve, reject) => { 
+        resolve(userList)
+      }); 
+    });
+    it("Call without param should return 200", async () => {
+      await supertest(app.getHttpServer()).get('/users').expect(200)
+        .then((res) => {
+            expect(res.body.length).toBe(userList.length);
+            expect(res.body[0].id).toBe(userList[0].id);
+            expect(res.body[0].userName).toBe(userList[0].userName);
+            expect(res.body[1].id).toBe(userList[1].id);
+        });
+    });
+    it("Call with query search return 200", async () => {
+      await supertest(app.getHttpServer()).get('/users?searchText=tata').expect(200)
+        .then((res) => {
+            expect(res.body.length).toBe(userList.length);
+            expect(res.body[0].id).toBe(userList[0].id);
+            expect(res.body[0].userName).toBe(userList[0].userName);
+            expect(res.body[1].id).toBe(userList[1].id);
+        });
+    });
+    it("Call with query role return 200", async () => {
+      await supertest(app.getHttpServer()).get('/users?role=tata').expect(200)
+        .then((res) => {
+            expect(res.body.length).toBe(userList.length);
+            expect(res.body[0].id).toBe(userList[0].id);
+            expect(res.body[0].userName).toBe(userList[0].userName);
+            expect(res.body[1].id).toBe(userList[1].id);
+        });
+    });
+    it("Call with query status return 200", async () => {
+      await supertest(app.getHttpServer()).get('/users?status=tata').expect(200)
+        .then((res) => {
+            expect(res.body.length).toBe(userList.length);
+            expect(res.body[0].id).toBe(userList[0].id);
+            expect(res.body[0].userName).toBe(userList[0].userName);
+            expect(res.body[1].id).toBe(userList[1].id);
+        });
+    });
+    it("Call with all param return 200", async () => {
+      await supertest(app.getHttpServer()).get('/users?searchText=tata&role=tata&status=tata').expect(200)
+        .then((res) => {
+            expect(res.body.length).toBe(userList.length);
+            expect(res.body[0].id).toBe(userList[0].id);
+            expect(res.body[0].userName).toBe(userList[0].userName);
+            expect(res.body[1].id).toBe(userList[1].id);
+        });
+    });
+    mock.mockClear();
   })
 
   describe('addUser test cases', () => {
-    it("", async () => {});
+    const mock = jest.spyOn(usersService, 'addUser');
+    mock.mockImplementation((user:AddUser) => { 
+      return new Promise((resolve, reject) => { 
+        resolve(userList[0].id);
+      }); 
+    });
+    it("Call with a correct entity should return a 201", async () => {
+      await supertest(app.getHttpServer()).post('/users')
+        .send({userName: 'test2', password: 'Code', eMail: 'zihef@zef.com'}).set('Content-Type', 'application/json').set('Accept', 'application/json')
+        .expect(201)
+        .then((res) => {
+            expect(res.text).toBe(userList[0].id);
+        });
+    });
+    it("Call without entity should return a 400", async () => {
+      await supertest(app.getHttpServer()).post('/users').expect(400);
+    });
+    it("Call with a wrong entity should return a 400", async () => {
+      await supertest(app.getHttpServer()).post('/users')
+        .send({password: 'Code', eMail: 'zihef@zef.com'}).set('Content-Type', 'application/json').set('Accept', 'application/json')
+        .expect(400)
+        .then((res) => {
+          expect(res.body.message.length).toBeGreaterThan(0);
+          expect(res.body.message[0]).toContain('userName');
+        });
+    });
+    mock.mockClear();
   })
 
   describe('updateUser test cases', () => {
-    it("", async () => {});
+    let updateUser:UpdateFullUser = {userName: 'test', eMail: 'test@gmail.com', role: 'User', status: 'Activated'};
+    let wrongUpdateUser:UpdateFullUser = {userName: 'test', eMail: 'test@gmail.com', role: 'zegzeg', status: 'Activated'};
+    const mock = jest.spyOn(usersService, 'updateUser');
+    mock.mockImplementation((id: string, user:UpdateFullUser) => { 
+      return new Promise((resolve, reject) => { 
+        resolve(updateUser);
+      }); 
+    });
+    it("Call with a correct entity should return a 200", async () => {
+      await supertest(app.getHttpServer()).put('/users/moniddeuser')
+        .send(updateUser).set('Content-Type', 'application/json').set('Accept', 'application/json')
+        .expect(200)
+        .then((res) => {
+          expect(res.body.userName).toBe(updateUser.userName);
+        });
+    });
+    it("Call without id should return a 404", async () => {
+      await supertest(app.getHttpServer()).put('/users')
+        .send(updateUser).set('Content-Type', 'application/json').set('Accept', 'application/json')
+        .expect(404);
+    });
+    it("Call with a wrong entity should return a 400", async () => {
+      await supertest(app.getHttpServer()).put('/users/moniddeuser')
+        .send(wrongUpdateUser).set('Content-Type', 'application/json').set('Accept', 'application/json')
+        .expect(400);
+    });
+    mock.mockClear();
   })
 
   describe('updateUser_UserName test cases', () => {
-    it("", async () => {});
+    const mock = jest.spyOn(usersService, 'updateUser_UserName');
+    mock.mockImplementation((id: string, userName:string) => { 
+      return new Promise((resolve, reject) => { 
+        resolve();
+      }); 
+    });
+    it("Call with a correct values should return a 200", async () => {
+      await supertest(app.getHttpServer()).put('/users/updateUserName/moniddeuser?userName=toto').expect(204)
+    });
+    it("Call without id should return a 400", async () => {
+      await supertest(app.getHttpServer()).put('/users/updateUserName/?userName=toto').expect(400);
+    });
+    it("Call without username should return a 400", async () => {
+      await supertest(app.getHttpServer()).put('/users/updateUserName/moniddeuser').expect(400);
+    });
+    mock.mockClear();
   })
 
   describe('updateUser_Password test cases', () => {
-    it("", async () => {});
+    const mock = jest.spyOn(usersService, 'updateUser_Password');
+    mock.mockImplementation((id: string, password:string) => { 
+      return new Promise((resolve, reject) => { 
+        resolve();
+      }); 
+    });
+    it("Call with a correct values should return a 200", async () => {
+      await supertest(app.getHttpServer()).put('/users/updatePassword/moniddeuser?password=toto').expect(204)
+    });
+    it("Call without id should return a 400", async () => {
+      await supertest(app.getHttpServer()).put('/users/updatePassword/?password=toto').expect(400);
+    });
+    it("Call without username should return a 400", async () => {
+      await supertest(app.getHttpServer()).put('/users/updatePassword/moniddeuser').expect(400);
+    });
+    mock.mockClear();
   })
 
   describe('updateUser_Status test cases', () => {
-    it("", async () => {});
+    const mock = jest.spyOn(usersService, 'updateUser_Status');
+    mock.mockImplementation((id: string, password:string) => { 
+      return new Promise((resolve, reject) => { 
+        resolve();
+      }); 
+    });
+    it("Call with a correct values should return a 200", async () => {
+      await supertest(app.getHttpServer()).put('/users/updateStatus/moniddeuser?status=Activated').expect(204)
+    });
+    it("Call without id should return a 400", async () => {
+      await supertest(app.getHttpServer()).put('/users/updateStatus/?status=Activated').expect(400);
+    });
+    it("Call without username should return a 400", async () => {
+      await supertest(app.getHttpServer()).put('/users/updateStatus/moniddeuser').expect(400);
+    });
+    mock.mockClear();
   })
 
   describe('resetPassword test cases', () => {
-    it("", async () => {});
+    const mock = jest.spyOn(usersService, 'resetPassword');
+    mock.mockImplementation((id: string) => { 
+      return new Promise((resolve, reject) => { 
+        resolve();
+      }); 
+    });
+    it("Call with a correct values should return a 200", async () => {
+      await supertest(app.getHttpServer()).put('/users/resetPassword/moniddeuser').expect(204)
+    });
+    it("Call without id should return a 400", async () => {
+      await supertest(app.getHttpServer()).put('/users/resetPassword').expect(400);
+    });
   })
 
   describe('deleteUser test cases', () => {
-    it("", async () => {});
+    const mock = jest.spyOn(usersService, 'deleteUser');
+    mock.mockImplementation((id: string) => { 
+      return new Promise((resolve, reject) => { 
+        resolve();
+      }); 
+    });
+    it("Call with a correct values should return a 200", async () => {
+      await supertest(app.getHttpServer()).delete('/users/moniddeuser').expect(204)
+    });
+    it("Call without id should return a 404", async () => {
+      await supertest(app.getHttpServer()).delete('/users').expect(404);
+    });
+    mock.mockClear();
   })
 
   describe('getUserRoles test cases', () => {
-    it("", async () => {});
-  })
+    it('Call should return a 200',async () => {
+      await supertest(app.getHttpServer()).get('/users/roles').expect(200).then((res) => {
+        console.log(res.body);
+        expect(res.body.length).toBe(2);
+      });
+    });
+  });
 
-  describe('getUserStatus test cases', () => {
-    it("", async () => {});
-  })
-
-  // async function getrestrictedLabelSuperTest(apiCall:string, checkRes:GetUser[]) {
-  //   await supertest(app.getHttpServer()).get(apiCall).expect(200)
-  //     .then((res) => {
-  //         expect(res.body[0].id).toBe(checkRes[0].id);
-  //         expect(res.body[0].name).toBe(checkRes[0].name);
-  //         expect(res.body[0].type).toBe(checkRes[0].type);
+  // describe('getUserStatus test cases', () => {
+  //   it('Call should return a 200', () => {
+  //     supertest(app.getHttpServer()).get('/users/status').expect(200).then((res) => {
+  //       expect(res.body.length).toBe(4);
   //     });
-  // }
+  //   });
+  // });
+
+  // describe('MongoDb is off', () => {
+  //   it("Call should return a 500", async () => {
+  //     const mock500 = jest.spyOn(usersService, 'getUser');
+  //     mock500.mockImplementation((id:string) => { 
+  //       throw new InternalServerErrorException('pas content');
+  //     });
+  //     await supertest(app.getHttpServer()).get(`/users/nomongo`)
+  //       .expect(500).then((res) => {
+  //         expect(res.body.error).toBe('Internal Server Error');
+  //         expect(res.body.message).toBe('pas content')
+  //       });
+  //     mock500.mockClear();
+  //   });
+  // });
 });

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, ValidationPipe } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, ValidationPipe,  } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApiBody, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { UpdateFullUser } from './dto/updateFullUser.dto';
@@ -18,7 +18,7 @@ export class UsersController {
   @ApiOkResponse({ type: GetUser })
   @ApiNotFoundResponse({ description: 'If unable to find the user id' })
   getUser(@Param('id') id:string) : Promise<GetUser> {
-    return null;
+    return this.usersService.getUser(id);
   }
 
   @Get()
@@ -28,7 +28,7 @@ export class UsersController {
   @ApiQuery({ name:'status', description: 'Exact statut to filter on', required: false, enum: UserStatusList })
   @ApiOkResponse({ type: [GetUser] })
   getUsers(@Query('searchText') searchText?:string, @Query('role') role?:Array<UserRoleList>, @Query('status') status?:Array<UserStatusList>) : Promise<Array<GetUser>> {
-    return null;
+    return this.usersService.getUsers(searchText, role, status);
   }
 
   @Post()
@@ -36,8 +36,7 @@ export class UsersController {
   @ApiBody({ required: true} )
   @ApiOkResponse({ description:'Return the generated Id of the new element', type: String })
   addUser(@Body(new ValidationPipe({expectedType:AddUser})) user:AddUser) : Promise<string> {
-    //ToDo (Send mail to Activate)
-    return null;
+    return this.usersService.addUser(user);
   }
 
   @Put('/:id')
@@ -47,37 +46,40 @@ export class UsersController {
   @ApiOkResponse({ description:'Return the update object', type: UpdateFullUser })
   @ApiNotFoundResponse({ description: 'If unable to find the user id' })
   updateUser(@Param('id') id:string, @Body(new ValidationPipe({expectedType:UpdateFullUser})) user:UpdateFullUser) : Promise<UpdateFullUser> {
-    return null;
+    return this.usersService.updateUser(id, user);
   }
 
-  @Put('/:id')
+  @Put('/updateUserName/:id')
   @ApiOperation({ summary: 'Update a user UserName' })
   @ApiParam({ name:'id', description: 'Id of the user to update', required: true })
   @ApiQuery({ name:'userName', description: 'Username to update', required: true })
   @HttpCode(204)
   @ApiNotFoundResponse({ description: 'If unable to find the user id' })
   updateUser_UserName(@Param('id') id:string, @Query('userName') userName:string) : Promise<void> {
-    return null;
+    if (userName == null || userName.length == 0) { throw new BadRequestException('userName Parameter is required'); }
+    return this.usersService.updateUser_UserName(id, userName);
   }
 
-  @Put('/:id')
+  @Put('/updatePassword/:id')
   @ApiOperation({ summary: 'Update a user Password' })
   @ApiParam({ name:'id', description: 'Id of the user to update', required: true })
   @ApiQuery({ name:'password', description: 'password to update', required: true })
   @HttpCode(204)
   @ApiNotFoundResponse({ description: 'If unable to find the user id' })
   updateUser_Password(@Param('id') id:string, @Query('password') password:string) : Promise<void> {
-    return null;
+    if (password == null || password.length == 0) { throw new BadRequestException('password Parameter is required'); }
+    return this.usersService.updateUser_Password(id, password);
   }
 
-  @Put('/:id')
+  @Put('/updateStatus/:id')
   @ApiOperation({ summary: 'Update a user Status' })
   @ApiParam({ name:'id', description: 'Id of the user to update', required: true })
   @ApiQuery({ name:'status', description: 'status to update', required: true })
   @HttpCode(204)
   @ApiNotFoundResponse({ description: 'If unable to find the user id' })
   updateUser_Status(@Param('id') id:string, @Query('status') status:UserStatusList) : Promise<void> {
-    return null;
+    if (status == null || status.length == 0) { throw new BadRequestException('status Parameter is required'); }
+    return this.usersService.updateUser_Status(id, status);
   }
 
   @Put('/resetPassword/:id')
@@ -86,29 +88,29 @@ export class UsersController {
   @HttpCode(204)
   @ApiNotFoundResponse({ description: 'If unable to find the user id' })
   resetPassword(@Param('id') id:string) : Promise<void> {
-    return null;
+    return this.usersService.resetPassword(id);
   }
 
-  @Delete()
+  @Delete('/:id')
   @ApiOperation({ summary: 'Delete a user' })
   @ApiParam({ name:'id', description: 'Id of the user to delete', required: true })
   @HttpCode(204)
   @ApiNotFoundResponse({ description: 'If unable to find the user id' })
   deleteUser(@Param('id') id:string) : Promise<void> {
-    return null;
+    return this.usersService.deleteUser(id);
   }
-
+  
   @Get('/roles')
   @ApiOperation({ summary: 'Get all the possible User Role' })
   @ApiOkResponse({ description:'Return the complete list of User Roles', type: Array<String> })
   getUserRoles() : Array<string> {
-    return null;
+    return this.usersService.getUserRoles();
   }
 
   @Get('/status')
   @ApiOperation({ summary: 'Get all the possible User status' })
   @ApiOkResponse({ description:'Return the complete list of Users Status', type: Array<String> })
   getUserStatus() : Array<string> {
-    return null;
+    return this.usersService.getUserStatus();
   }
 }

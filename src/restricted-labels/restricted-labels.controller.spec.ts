@@ -174,7 +174,7 @@ describe('RestrictedLabelsController', () => {
   });
 
   describe('getRestrictedLabelTypes test cases', () => {
-    it('Call with a correct id should return a 200', () => {
+    it('Call should return a 200', () => {
       supertest(app.getHttpServer()).get('/restricted-labels/types').expect(200).then((res) => {
         expect(res.body.length).toBe(3);
       });

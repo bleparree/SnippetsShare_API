@@ -3,7 +3,6 @@ import { IsEmail, IsEnum, IsNotEmpty, IsString } from "class-validator";
 import { Document, WithId } from "mongodb";
 import { UserRoleList } from "./userRoleList.entity";
 import { UserStatusList } from "./userStatusList.entity";
-import { updateFullUser } from "../dto/updateFullUser.dto";
 
 export class User {
     @ApiProperty({ description:"User Unique identifier" })
