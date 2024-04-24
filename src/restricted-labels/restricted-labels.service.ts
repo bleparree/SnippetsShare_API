@@ -49,7 +49,8 @@ export class RestrictedLabelsService {
 
   /**
    * Mongo acess to update a existing RestrictedLabel
-   * @param updateDTO Object to update
+   * @param id The restricted label id to update
+   * @param name the new Restricted Label Name
    * @returns the modified object
    */
   async updateRestrictedLabel(id:string, name:string) : Promise<updateRestrictedLabel> {
