@@ -1,5 +1,5 @@
 import { HttpException, Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { Db, Document, Filter, InsertOneResult, ObjectId, UpdateFilter, UpdateResult, WithId } from 'mongodb';
+import { Db, DeleteResult, Document, Filter, InsertOneResult, ObjectId, UpdateResult, WithId } from 'mongodb';
 import { GetUser } from './dto/getUser.dto';
 import { UserRoleList } from 'src/resources/entities/userRoleList.entity';
 import { UserStatusList } from 'src/resources/entities/userStatusList.entity';
@@ -85,7 +85,7 @@ export class UsersService {
 
     /**
      * Mongo acess to update globaly an existing User
-     * @param id The restricted label id to update
+     * @param id The user id to update
      * @param user the updated object
      * @returns the modified object
      */
@@ -96,30 +96,87 @@ export class UsersService {
                 return user;
             }
             else throw new NotFoundException('Cannot find any User to update');
-          }
-          catch (err) { 
+        }
+        catch (err) { 
             if (err instanceof HttpException) throw err;
             else throw new InternalServerErrorException(err); 
-          };
+        };
     }
 
+    /**
+     * Mongo acess to update the username of an existing User
+     * @param id The user id to update
+     * @param userName The new userName
+     */
     async updateUser_UserName(id:string, userName:string) : Promise<void> {
-        return null;
+        try {
+            let value:UpdateResult<Document> = await this.db.collection('User').updateOne({ _id: new ObjectId(id) }, { $set: { userName: userName } })
+            if (!(value.acknowledged && value.matchedCount == 1)) {
+                throw new NotFoundException('Cannot find any User to update');
+            }
+        }
+        catch (err) { 
+            if (err instanceof HttpException) throw err;
+            else throw new InternalServerErrorException(err); 
+        };
     }
 
+    /**
+     * Mongo acess to update the password of an existing User
+     * @param id The user id to update
+     * @param password The new password
+     */
     async updateUser_Password(id:string, password:string) : Promise<void> {
-        return null;
+        try {
+            let value:UpdateResult<Document> = await this.db.collection('User').updateOne({ _id: new ObjectId(id) }, { $set: { password: password } })
+            if (!(value.acknowledged && value.matchedCount == 1)) {
+                throw new NotFoundException('Cannot find any User to update');
+            }
+        }
+        catch (err) { 
+            if (err instanceof HttpException) throw err;
+            else throw new InternalServerErrorException(err); 
+        };
     }
 
+    /**
+     * Mongo acess to update the status of an existing User
+     * @param id The user id to update
+     * @param password The new status
+     */
     async updateUser_Status(id:string, status:UserStatusList) : Promise<void> {
-        return null;
+        try {
+            let value:UpdateResult<Document> = await this.db.collection('User').updateOne({ _id: new ObjectId(id) }, { $set: { status: status } })
+            if (!(value.acknowledged && value.matchedCount == 1)) {
+                throw new NotFoundException('Cannot find any User to update');
+            }
+        }
+        catch (err) { 
+            if (err instanceof HttpException) throw err;
+            else throw new InternalServerErrorException(err); 
+        };
     }
 
+    /**
+     * Mongo acess to set the status of an existing User to ReInitPassword and send a mail of reinitialization
+     * @param id The user id to update
+     */
     async resetPassword(id:string) : Promise<void> {
-        return null;
+        //TODO
     }
 
+    /**
+     * Delete a User
+     * @param id User id to delete
+     */
     async deleteUser(id:string) : Promise<void> {
-        return null;
+        try {
+            let value:DeleteResult = await this.db.collection('User').deleteOne({ _id: new ObjectId(id) });
+            if (!value.acknowledged || value.deletedCount == 0) throw new NotFoundException('Cannot found any User to delete');
+        }
+        catch (err) { 
+            if (err instanceof HttpException) throw err;
+            else throw new InternalServerErrorException(err); 
+        };
     }
 }

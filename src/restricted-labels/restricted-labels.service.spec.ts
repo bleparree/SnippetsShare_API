@@ -6,7 +6,6 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import { addRestrictedLabel } from './dto/addRestrictedLabel.dto';
 import { updateRestrictedLabel } from './dto/updateRestrictedLabel.dto';
 import { InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { mock } from 'node:test';
 
 describe('RestrictedLabelsService', () => {
   let service: RestrictedLabelsService;
