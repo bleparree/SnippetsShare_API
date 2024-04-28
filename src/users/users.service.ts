@@ -16,15 +16,13 @@ export class UsersService {
      * @returns the user if one is find (throw exception overwize)
      */
     async getUser(id: string): Promise<GetUser> {
-        let ret: GetUser = new GetUser();
         let filterDocument:Filter<Document> = { _id: new ObjectId(id) };
 
         try {
-            let value: WithId<Document> = await this.db.collection('RestrictedLabel').findOne(filterDocument);
+            let value: WithId<Document> = await this.db.collection('User').findOne(filterDocument);
             if (!value) throw new NotFoundException('No user can be found for id ' + id);
             
-            ret.initWithMongoObject(value)
-            return ret;
+            return new GetUser(value);
         }
         catch (err) { 
             if (err instanceof HttpException) throw err;
@@ -54,14 +52,14 @@ export class UsersService {
         if (role) filterArray.push(filterRole);
         if (status) filterArray.push(filterStatus);
         
-        filterDocument = { $and: [ filterArray ] } 
+        if (filterArray.length > 0) filterDocument = { $and: [ filterArray ] } 
     
         try {
           let value: WithId<Document>[] = await this.db.collection('User').find(filterDocument).toArray();
           if (value.length > 0) {
             return value.map(val => {
-                let ret = new GetUser(); ret.initWithMongoObject(val);
-                return ret;
+                // let ret = new GetUser(); ret.initWithMongoObject(val);
+                return new GetUser(val);
             });
           }
           return [];

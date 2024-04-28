@@ -1,19 +1,4 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsEmail, IsNotEmpty, IsString } from "class-validator";
+import { OmitType } from "@nestjs/swagger";
+import { User } from "../entities/user.entity";
 
-export class AddUser {
-    @ApiProperty({ description:"User UserName" })
-    @IsString()
-    @IsNotEmpty()
-    userName:string;
-    
-    @ApiProperty({ description:"User Password" })
-    @IsString()
-    @IsNotEmpty()
-    password:string;
-    
-    @ApiProperty({ description:"User EMail" })
-    @IsEmail()
-    @IsNotEmpty()
-    eMail:string;
-}
+export class AddUser extends OmitType(User, ['id', 'role', 'status']) {}

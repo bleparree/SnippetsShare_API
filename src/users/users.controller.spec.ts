@@ -12,11 +12,11 @@ describe('UsersController', () => {
   let app: INestApplication;
   let usersService = new UsersService(null);
   const mockUserList: GetUser[] = [
-    { id: 'erjhn5zr4th2rt1', userName: 'User1', eMail: 'User1SnippetShare@yopmail.com', role: 'SuperAdmin', status: 'Activated', initWithMongoObject: GetUser.prototype.initWithMongoObject},
-    { id: 'erjhn5zr4th2rt2', userName: 'User2', eMail: 'User2SnippetShare@yopmail.com', role: 'User', status: 'ToActivate', initWithMongoObject: GetUser.prototype.initWithMongoObject}, 
-    { id: 'erjhn5zr4th2rt3', userName: 'User3', eMail: 'User3SnippetShare@yopmail.com', role: 'User', status: 'ReInitPassword', initWithMongoObject: GetUser.prototype.initWithMongoObject}, 
-    { id: 'erjhn5zr4th2rt4', userName: 'User4', eMail: 'User4SnippetShare@yopmail.com', role: 'User', status: 'Suspended', initWithMongoObject: GetUser.prototype.initWithMongoObject}, 
-    { id: 'erjhn5zr4th2rt5', userName: 'User5', eMail: 'User5SnippetShare@yopmail.com', role: 'User', status: 'Activated', initWithMongoObject: GetUser.prototype.initWithMongoObject}
+    { id: 'erjhn5zr4th2rt1', userName: 'User1', eMail: 'User1SnippetShare@yopmail.com', role: 'SuperAdmin', status: 'Activated'},
+    { id: 'erjhn5zr4th2rt2', userName: 'User2', eMail: 'User2SnippetShare@yopmail.com', role: 'User', status: 'ToActivate'}, 
+    { id: 'erjhn5zr4th2rt3', userName: 'User3', eMail: 'User3SnippetShare@yopmail.com', role: 'User', status: 'ReInitPassword'}, 
+    { id: 'erjhn5zr4th2rt4', userName: 'User4', eMail: 'User4SnippetShare@yopmail.com', role: 'User', status: 'Suspended'}, 
+    { id: 'erjhn5zr4th2rt5', userName: 'User5', eMail: 'User5SnippetShare@yopmail.com', role: 'User', status: 'Activated'}
   ];
   let userList: GetUser[];
 

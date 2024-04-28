@@ -36,13 +36,4 @@ export class User {
     @IsEnum(UserStatusList)
     @IsNotEmpty()
     status:string;
-
-    initWithMongoObject(doc:WithId<Document>) {
-        this.id = doc._id.toString();
-        this.userName = doc.userName;
-        this.password = doc.password;
-        this.eMail = doc.eMail;
-        this.role = doc.role;
-        this.status = doc.status;
-    }
 }
