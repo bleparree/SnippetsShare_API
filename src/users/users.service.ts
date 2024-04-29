@@ -44,15 +44,24 @@ export class UsersService {
                 { 'userName': { $regex: `^.*((?i)${searchText}).*$` }},
                 { 'eMail': { $regex: `^.*((?i)${searchText}).*$` }}
             ]};
-        const filterRole = { 'role': role };
-        const filterStatus = { 'status': status };
 
         let filterArray = [];
         if (searchText) filterArray.push(filterSearch);
-        if (role) filterArray.push(filterRole);
-        if (status) filterArray.push(filterStatus);
+        if (role && role.length > 0) {
+            let mongoRoleSearch = [];
+            role.forEach(r => mongoRoleSearch.push({ 'role': r }));
+            if (mongoRoleSearch.length == 1) filterArray.push(mongoRoleSearch[0]);
+            else filterArray.push({ $or: mongoRoleSearch });
+        }
+        if (status && status.length > 0) {
+            let mongoStatusSearch = [];
+            status.forEach(r => mongoStatusSearch.push({ 'status': r }));
+            if (mongoStatusSearch.length == 1) filterArray.push(mongoStatusSearch[0]);
+            else filterArray.push({ $or: mongoStatusSearch });
+        }
         
-        if (filterArray.length > 0) filterDocument = { $and: [ filterArray ] } 
+        if (filterArray.length > 1) filterDocument = { $and: filterArray } 
+        else if (filterArray.length == 1) filterDocument = filterArray[0];
     
         try {
           let value: WithId<Document>[] = await this.db.collection('User').find(filterDocument).toArray();

@@ -5,6 +5,8 @@ import { Db, MongoClient, ObjectId } from 'mongodb';
 import { InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { User } from './entities/user.entity';
 import { GetUser } from './dto/getUser.dto';
+import { UserRoleList } from 'src/resources/entities/userRoleList.entity';
+import { UserStatusList } from 'src/resources/entities/userStatusList.entity';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -83,14 +85,58 @@ describe('UsersService', () => {
       let res = await service.getUsers();
       expect(res).toStrictEqual(userFullList.map(val => new GetUser(val)));
     });
-    // it('Test to get the list filtered by a username', async () => {});
-    // it('Test to get the list filtered by an email', async () => {});
-    // it('Test to get the list filtered by a part of mail + username', async () => {});
-    // it('Test to get the list filtered by superadmin role', async () => {});
-    // it('Test to get the list filtered by ToActivate status', async () => {});
-    // it('Test to get the list with searchname test.fr and role user and status Activated', async () => {});
-    // it('Test to get the list with searchname widad (different case) and status ReInitPassword', async () => {});
-    // it('Test to get something who don't exist', async () => {});
+    it('Test to get the list filtered by a username', async () => {
+      let searchText = 'wiDad';
+      let res = await service.getUsers(searchText);
+      expect(res).toStrictEqual(
+        userFullList.filter(val => val.userName.toLocaleLowerCase().indexOf(searchText.toLocaleLowerCase()) >= 0 || 
+                                    val.eMail.toLocaleLowerCase().indexOf(searchText.toLocaleLowerCase()) >= 0 ).map(val => new GetUser(val)));
+    });
+    it('Test to get the list filtered by an email', async () => {
+      let searchText = 'wiwi';
+      let res = await service.getUsers(searchText);
+      expect(res).toStrictEqual(
+        userFullList.filter(val => val.userName.toLocaleLowerCase().indexOf(searchText.toLocaleLowerCase()) >= 0 || 
+                                    val.eMail.toLocaleLowerCase().indexOf(searchText.toLocaleLowerCase()) >= 0 ).map(val => new GetUser(val)));
+    });
+    it('Test to get the list filtered by a part of mail + username', async () => {
+      let searchText = 'ben';
+      let res = await service.getUsers(searchText);
+      expect(res).toStrictEqual(
+        userFullList.filter(val => val.userName.toLocaleLowerCase().indexOf(searchText.toLocaleLowerCase()) >= 0 || 
+                                    val.eMail.toLocaleLowerCase().indexOf(searchText.toLocaleLowerCase()) >= 0 ).map(val => new GetUser(val)));
+    });
+    it('Test to get the list filtered by superadmin role', async () => {
+      let searchRole = UserRoleList.SuperAdmin;
+      let res = await service.getUsers(null, [searchRole]);
+      expect(res).toStrictEqual(userFullList.filter(val => val.role == searchRole).map(val => new GetUser(val)));
+    });
+    it('Test to get the list filtered by ToActivate status', async () => {
+      let searchStatus = UserStatusList.ToActivate;
+      let res = await service.getUsers(null, null, [searchStatus]);
+      expect(res).toStrictEqual(userFullList.filter(val => val.status == searchStatus).map(val => new GetUser(val)));
+    });
+    it('Test to get the list with searchname test.fr and role user and status Activated', async () => {
+      let searchText = 'test.fr';
+      let searchStatus = UserStatusList.ToActivate;
+      let res = await service.getUsers(searchText, null, [searchStatus]);
+      expect(res).toStrictEqual(
+        userFullList.filter(val => val.status == searchStatus &&
+                                  (val.userName.toLocaleLowerCase().indexOf(searchText.toLocaleLowerCase()) >= 0 || 
+                                    val.eMail.toLocaleLowerCase().indexOf(searchText.toLocaleLowerCase()) >= 0)).map(val => new GetUser(val)));
+    });
+    it('Test to get the list with searchname widad (different case) and status ReInitPassword', async () => {
+      let searchText = 'widad';
+      let res = await service.getUsers(searchText);
+      expect(res).toStrictEqual(
+        userFullList.filter(val => val.userName.toLocaleLowerCase().indexOf(searchText.toLocaleLowerCase()) >= 0 || 
+                                    val.eMail.toLocaleLowerCase().indexOf(searchText.toLocaleLowerCase()) >= 0 ).map(val => new GetUser(val)));
+    });
+    it('Test to get something who don\'t exist', async () => {
+      let searchText = 'something who dont exist';
+      let res = await service.getUsers(searchText);
+      expect(res).toStrictEqual([]);
+    });
   });
 
   describe('addUser', () => {
