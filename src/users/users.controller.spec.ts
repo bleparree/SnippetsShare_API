@@ -6,11 +6,13 @@ import { GetUser } from './dto/getUser.dto';
 import supertest from 'supertest';
 import { AddUser } from './dto/addUser.dto';
 import { UpdateFullUser } from './dto/updateFullUser.dto';
+import { ObjectId } from 'mongodb';
 
 describe('UsersController', () => {
   let controller: UsersController;
   let app: INestApplication;
   let usersService = new UsersService(null);
+  let validObjectId = new ObjectId().toString();
   const mockUserList: GetUser[] = [
     { id: 'erjhn5zr4th2rt1', userName: 'User1', eMail: 'User1SnippetShare@yopmail.com', role: 'SuperAdmin', status: 'Activated'},
     { id: 'erjhn5zr4th2rt2', userName: 'User2', eMail: 'User2SnippetShare@yopmail.com', role: 'User', status: 'ToActivate'}, 
@@ -46,7 +48,7 @@ describe('UsersController', () => {
       }); 
     });
     it("Call should return 200", async () => {
-      await supertest(app.getHttpServer()).get('/users/12').expect(200)
+      await supertest(app.getHttpServer()).get('/users/' + validObjectId).expect(200)
         .then((res) => {
             expect(res.body.id).toBe(userList[0].id);
             expect(res.body.eMail).toBe(userList[0].eMail);
@@ -81,7 +83,7 @@ describe('UsersController', () => {
         });
     });
     it("Call with query role return 200", async () => {
-      await supertest(app.getHttpServer()).get('/users?role=tata').expect(200)
+      await supertest(app.getHttpServer()).get('/users?role=User&role=SuperAdmin').expect(200)
         .then((res) => {
             expect(res.body.length).toBe(userList.length);
             expect(res.body[0].id).toBe(userList[0].id);
@@ -90,7 +92,7 @@ describe('UsersController', () => {
         });
     });
     it("Call with query status return 200", async () => {
-      await supertest(app.getHttpServer()).get('/users?status=tata').expect(200)
+      await supertest(app.getHttpServer()).get('/users?status=Activated').expect(200)
         .then((res) => {
             expect(res.body.length).toBe(userList.length);
             expect(res.body[0].id).toBe(userList[0].id);
@@ -99,7 +101,7 @@ describe('UsersController', () => {
         });
     });
     it("Call with all param return 200", async () => {
-      await supertest(app.getHttpServer()).get('/users?searchText=tata&role=tata&status=tata').expect(200)
+      await supertest(app.getHttpServer()).get('/users?searchText=tata&role=User&status=Activated').expect(200)
         .then((res) => {
             expect(res.body.length).toBe(userList.length);
             expect(res.body[0].id).toBe(userList[0].id);
@@ -150,7 +152,7 @@ describe('UsersController', () => {
       }); 
     });
     it("Call with a correct entity should return a 200", async () => {
-      await supertest(app.getHttpServer()).put('/users/moniddeuser')
+      await supertest(app.getHttpServer()).put('/users/' + validObjectId)
         .send(updateUser).set('Content-Type', 'application/json').set('Accept', 'application/json')
         .expect(200)
         .then((res) => {
@@ -178,7 +180,7 @@ describe('UsersController', () => {
       }); 
     });
     it("Call with a correct values should return a 200", async () => {
-      await supertest(app.getHttpServer()).put('/users/updateUserName/moniddeuser?userName=toto').expect(204)
+      await supertest(app.getHttpServer()).put(`/users/updateUserName/${validObjectId}?userName=toto`).expect(204)
     });
     it("Call without id should return a 400", async () => {
       await supertest(app.getHttpServer()).put('/users/updateUserName/?userName=toto').expect(400);
@@ -197,7 +199,7 @@ describe('UsersController', () => {
       }); 
     });
     it("Call with a correct values should return a 200", async () => {
-      await supertest(app.getHttpServer()).put('/users/updatePassword/moniddeuser?password=toto').expect(204)
+      await supertest(app.getHttpServer()).put(`/users/updatePassword/${validObjectId}?password=toto`).expect(204)
     });
     it("Call without id should return a 400", async () => {
       await supertest(app.getHttpServer()).put('/users/updatePassword/?password=toto').expect(400);
@@ -216,7 +218,7 @@ describe('UsersController', () => {
       }); 
     });
     it("Call with a correct values should return a 200", async () => {
-      await supertest(app.getHttpServer()).put('/users/updateStatus/moniddeuser?status=Activated').expect(204)
+      await supertest(app.getHttpServer()).put(`/users/updateStatus/${validObjectId}?status=Activated`).expect(204)
     });
     it("Call without id should return a 400", async () => {
       await supertest(app.getHttpServer()).put('/users/updateStatus/?status=Activated').expect(400);
@@ -235,7 +237,7 @@ describe('UsersController', () => {
       }); 
     });
     it("Call with a correct values should return a 200", async () => {
-      await supertest(app.getHttpServer()).put('/users/resetPassword/moniddeuser').expect(204)
+      await supertest(app.getHttpServer()).put(`/users/resetPassword/${validObjectId}`).expect(204)
     });
     it("Call without id should return a 400", async () => {
       await supertest(app.getHttpServer()).put('/users/resetPassword').expect(400);
@@ -250,7 +252,7 @@ describe('UsersController', () => {
       }); 
     });
     it("Call with a correct values should return a 200", async () => {
-      await supertest(app.getHttpServer()).delete('/users/moniddeuser').expect(204)
+      await supertest(app.getHttpServer()).delete('/users/' + validObjectId).expect(204)
     });
     it("Call without id should return a 404", async () => {
       await supertest(app.getHttpServer()).delete('/users').expect(404);
@@ -264,7 +266,7 @@ describe('UsersController', () => {
       mock500.mockImplementation((id:string) => { 
         throw new InternalServerErrorException('pas content');
       });
-      await supertest(app.getHttpServer()).get(`/users/nomongo`)
+      await supertest(app.getHttpServer()).get(`/users/`+ validObjectId)
         .expect(500).then((res) => {
           expect(res.body.error).toBe('Internal Server Error');
           expect(res.body.message).toBe('pas content')

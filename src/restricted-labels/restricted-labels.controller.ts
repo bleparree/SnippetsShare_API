@@ -1,9 +1,10 @@
-import { BadRequestException, Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, ValidationPipe } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, HttpCode, Param, ParseEnumPipe, Post, Put, Query, ValidationPipe } from '@nestjs/common';
 import { RestrictedLabelsService } from './restricted-labels.service';
 import { RestrictedLabel } from './entities/restrictedLabel.entity';
 import { updateRestrictedLabel } from './dto/updateRestrictedLabel.dto';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { addRestrictedLabel } from './dto/addRestrictedLabel.dto';
+import { typeList } from 'src/resources/entities/typeList.entity';
 
 @ApiTags('RestrictedLabels')
 @Controller('restricted-labels')
@@ -13,9 +14,9 @@ export class RestrictedLabelsController {
   @Get()
   @ApiOperation({ summary: 'Get All the restricted labels' })
   @ApiQuery({ name:'name', description: 'Filter restricted label based on a partial name', required: false })
-  @ApiQuery({ name:'type', description: 'Filter among a predefined list of restricted label types', required: false })
+  @ApiQuery({ name:'type', description: 'Filter among a predefined list of restricted label types', required: false, enum: typeList })
   @ApiOkResponse({ type: [RestrictedLabel] })
-  getRestrictedLabels(@Query('name') name?: string, @Query('type') type?: string) : Promise<Array<RestrictedLabel>> {
+  getRestrictedLabels(@Query('name') name?: string, @Query('type', new ParseEnumPipe(typeList, {optional:true})) type?: typeList) : Promise<Array<RestrictedLabel>> {
     return this.restrictedLabelsService.getRestrictedLabels(name, type);
   }
 

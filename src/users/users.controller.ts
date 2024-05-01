@@ -1,11 +1,12 @@
-import { BadRequestException, Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, ValidationPipe,  } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, HttpCode, Optional, Param, ParseArrayPipe, ParseEnumPipe, Post, Put, Query, ValidationPipe,  } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApiBody, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { UpdateFullUser } from './dto/updateFullUser.dto';
 import { AddUser } from './dto/addUser.dto';
-import { UserStatusList } from 'src/resources/entities/userStatusList.entity';
-import { UserRoleList } from 'src/resources/entities/userRoleList.entity';
+import { UserStatusList, UserStatusValidationPipe } from 'src/resources/entities/userStatusList.entity';
+import { UserRoleList, UserRoleValidationPipe } from 'src/resources/entities/userRoleList.entity';
 import { GetUser } from './dto/getUser.dto';
+import { MongoIdValidationPipe } from 'src/restricted-labels/entities/restrictedLabel.entity';
 
 @ApiTags('Users')
 @Controller('users')
@@ -17,17 +18,20 @@ export class UsersController {
   @ApiParam({ name:'id', description: 'Id of the user to get', required: true })
   @ApiOkResponse({ type: GetUser })
   @ApiNotFoundResponse({ description: 'If unable to find the user id' })
-  getUser(@Param('id') id:string) : Promise<GetUser> {
+  getUser(@Param('id', new MongoIdValidationPipe()) id:string) : Promise<GetUser> {
     return this.usersService.getUser(id);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get All Users filtered by username/Mail - role and status' })
   @ApiQuery({ name:'searchText', description: 'partial search into UserName AND EMails', required: false })
-  @ApiQuery({ name:'role', description: 'Exact role to filter on', required: false, enum: UserRoleList })
-  @ApiQuery({ name:'status', description: 'Exact statut to filter on', required: false, enum: UserStatusList })
+  @ApiQuery({ name:'role', description: 'Role or list of role to filter on', required: false, enum: UserRoleList })
+  @ApiQuery({ name:'status', description: 'Statut or list of status to filter on', required: false, enum: UserStatusList })
   @ApiOkResponse({ type: [GetUser] })
-  getUsers(@Query('searchText') searchText?:string, @Query('role') role?:Array<UserRoleList>, @Query('status') status?:Array<UserStatusList>) : Promise<Array<GetUser>> {
+  getUsers(
+    @Query('searchText') searchText?:string, 
+    @Query('role', new UserRoleValidationPipe()) role?:Array<UserRoleList>, 
+    @Query('status', new UserStatusValidationPipe()) status?:Array<UserStatusList>) : Promise<Array<GetUser>> {
     return this.usersService.getUsers(searchText, role, status);
   }
 
@@ -45,7 +49,7 @@ export class UsersController {
   @ApiBody({ required: true} )
   @ApiOkResponse({ description:'Return the update object', type: UpdateFullUser })
   @ApiNotFoundResponse({ description: 'If unable to find the user id' })
-  updateUser(@Param('id') id:string, @Body(new ValidationPipe({expectedType:UpdateFullUser})) user:UpdateFullUser) : Promise<UpdateFullUser> {
+  updateUser(@Param('id', new MongoIdValidationPipe()) id:string, @Body(new ValidationPipe({expectedType:UpdateFullUser})) user:UpdateFullUser) : Promise<UpdateFullUser> {
     return this.usersService.updateUser(id, user);
   }
 
@@ -55,7 +59,7 @@ export class UsersController {
   @ApiQuery({ name:'userName', description: 'Username to update', required: true })
   @HttpCode(204)
   @ApiNotFoundResponse({ description: 'If unable to find the user id' })
-  updateUser_UserName(@Param('id') id:string, @Query('userName') userName:string) : Promise<void> {
+  updateUser_UserName(@Param('id', new MongoIdValidationPipe()) id:string, @Query('userName') userName:string) : Promise<void> {
     if (userName == null || userName.length == 0) { throw new BadRequestException('userName Parameter is required'); }
     return this.usersService.updateUser_UserName(id, userName);
   }
@@ -66,7 +70,7 @@ export class UsersController {
   @ApiQuery({ name:'password', description: 'password to update', required: true })
   @HttpCode(204)
   @ApiNotFoundResponse({ description: 'If unable to find the user id' })
-  updateUser_Password(@Param('id') id:string, @Query('password') password:string) : Promise<void> {
+  updateUser_Password(@Param('id', new MongoIdValidationPipe()) id:string, @Query('password') password:string) : Promise<void> {
     if (password == null || password.length == 0) { throw new BadRequestException('password Parameter is required'); }
     return this.usersService.updateUser_Password(id, password);
   }
@@ -77,7 +81,7 @@ export class UsersController {
   @ApiQuery({ name:'status', description: 'status to update', required: true })
   @HttpCode(204)
   @ApiNotFoundResponse({ description: 'If unable to find the user id' })
-  updateUser_Status(@Param('id') id:string, @Query('status') status:UserStatusList) : Promise<void> {
+  updateUser_Status(@Param('id', new MongoIdValidationPipe()) id:string, @Query('status', new ParseEnumPipe(UserStatusList)) status:UserStatusList) : Promise<void> {
     if (status == null || status.length == 0) { throw new BadRequestException('status Parameter is required'); }
     return this.usersService.updateUser_Status(id, status);
   }
@@ -87,7 +91,7 @@ export class UsersController {
   @ApiParam({ name:'id', description: 'Id of the user to reset the password', required: true })
   @HttpCode(204)
   @ApiNotFoundResponse({ description: 'If unable to find the user id' })
-  resetPassword(@Param('id') id:string) : Promise<void> {
+  resetPassword(@Param('id', new MongoIdValidationPipe()) id:string) : Promise<void> {
     return this.usersService.resetPassword(id);
   }
 
@@ -96,7 +100,7 @@ export class UsersController {
   @ApiParam({ name:'id', description: 'Id of the user to delete', required: true })
   @HttpCode(204)
   @ApiNotFoundResponse({ description: 'If unable to find the user id' })
-  deleteUser(@Param('id') id:string) : Promise<void> {
+  deleteUser(@Param('id', new MongoIdValidationPipe()) id:string) : Promise<void> {
     return this.usersService.deleteUser(id);
   }
 }
