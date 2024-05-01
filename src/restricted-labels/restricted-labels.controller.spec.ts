@@ -172,14 +172,6 @@ describe('RestrictedLabelsController', () => {
       mock500.mockClear();
     });
   });
-
-  describe('getRestrictedLabelTypes test cases', () => {
-    it('Call with a correct id should return a 200', () => {
-      supertest(app.getHttpServer()).get('/restricted-labels/types').expect(200).then((res) => {
-        expect(res.body.length).toBe(3);
-      });
-    });
-  });
   
   async function getrestrictedLabelSuperTest(apiCall:string, checkRes:RestrictedLabel[]) {
     await supertest(app.getHttpServer()).get(apiCall).expect(200)

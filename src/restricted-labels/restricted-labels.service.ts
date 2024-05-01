@@ -3,7 +3,6 @@ import { RestrictedLabel } from './entities/restrictedLabel.entity';
 import { updateRestrictedLabel } from './dto/updateRestrictedLabel.dto';
 import { Db, DeleteResult, Document, Filter, InsertOneResult, ObjectId, UpdateResult, WithId } from 'mongodb';
 import { addRestrictedLabel } from './dto/addRestrictedLabel.dto';
-import { typeList } from './entities/typeList.entity';
 
 @Injectable()
 export class RestrictedLabelsService {
@@ -50,7 +49,8 @@ export class RestrictedLabelsService {
 
   /**
    * Mongo acess to update a existing RestrictedLabel
-   * @param updateDTO Object to update
+   * @param id The restricted label id to update
+   * @param name the new Restricted Label Name
    * @returns the modified object
    */
   async updateRestrictedLabel(id:string, name:string) : Promise<updateRestrictedLabel> {
@@ -78,13 +78,5 @@ export class RestrictedLabelsService {
       if (err instanceof HttpException) throw err;
       else throw new InternalServerErrorException(err); 
     };
-  }
-
-  /**
-   * get all Restricted label types
-   * @returns List of Restricted label types (from enum)
-   */
-  getRestrictedLabelTypes() : Array<string> {
-    return Object.values(typeList);
   }
 }

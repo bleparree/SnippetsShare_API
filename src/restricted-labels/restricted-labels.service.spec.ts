@@ -6,7 +6,6 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import { addRestrictedLabel } from './dto/addRestrictedLabel.dto';
 import { updateRestrictedLabel } from './dto/updateRestrictedLabel.dto';
 import { InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { mock } from 'node:test';
 
 describe('RestrictedLabelsService', () => {
   let service: RestrictedLabelsService;
@@ -156,14 +155,6 @@ describe('RestrictedLabelsService', () => {
         expect(error).toBeDefined();
         expect(error).toBeInstanceOf(NotFoundException);
       }
-    });
-  });
-
-  describe('getRestrictedLabelTypes', () => {
-    it('Test to get Label Types',async () => {
-      const res = service.getRestrictedLabelTypes();
-      expect(res).toBeDefined();
-      expect(res.length).toBeGreaterThanOrEqual(1);
     });
   });
 

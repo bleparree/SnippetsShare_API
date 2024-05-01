@@ -1,16 +1,4 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsEnum, IsString, IsNotEmpty } from "class-validator";
-import { typeList } from "../entities/typeList.entity";
+import { OmitType } from "@nestjs/swagger";
+import { RestrictedLabel } from "../entities/restrictedLabel.entity";
 
-export class addRestrictedLabel {
-    @ApiProperty({ description:"Name of the label" })
-    @IsString()
-    @IsNotEmpty()
-    name:string;
-    
-    @ApiProperty({ enum:typeList, description:"Type of label" })
-    @IsString()
-    @IsNotEmpty()
-    @IsEnum(typeList)
-    type:string;
-}
+export class addRestrictedLabel extends OmitType(RestrictedLabel, ['id']) {}
