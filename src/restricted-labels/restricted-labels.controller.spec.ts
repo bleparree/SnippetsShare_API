@@ -46,10 +46,10 @@ describe('RestrictedLabelsController', () => {
       await getrestrictedLabelSuperTest(`/restricted-labels`, usedRestrictedLabelList);
     });
     it("Call with both params should return 200", async () => {
-      await getrestrictedLabelSuperTest(`/restricted-labels?name=titi&type=toto`, usedRestrictedLabelList);
+      await getrestrictedLabelSuperTest(`/restricted-labels?name=titi&type=Code`, usedRestrictedLabelList);
     });
     it("Call only with type should return 200 and the available datas", async () => {
-      await getrestrictedLabelSuperTest(`/restricted-labels?type=toto`, usedRestrictedLabelList);
+      await getrestrictedLabelSuperTest(`/restricted-labels?type=Code`, usedRestrictedLabelList);
     });
     it("Call only with name should return 200", async () => {
       await getrestrictedLabelSuperTest(`/restricted-labels?name=toto`, usedRestrictedLabelList);

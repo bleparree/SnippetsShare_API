@@ -6,9 +6,9 @@ import { MongoClient } from 'mongodb';
     {
       provide: 'MONGO_CLIENT',
       useFactory: async () => {
-        // const atlasCS = 'mongodb+srv://benoitleparree:FOCpHxSqBpT4BFQl@bleparree-cluster.izzh018.mongodb.net/?retryWrites=true&w=majority&appName=bleparree-cluster';
-        const localCS = 'mongodb://localhost:27017';
-        const client = new MongoClient(localCS);
+        const atlasCS = 'mongodb+srv://benoitleparree:FOCpHxSqBpT4BFQl@bleparree-cluster.izzh018.mongodb.net/?retryWrites=true&w=majority&appName=bleparree-cluster';
+        // const localCS = 'mongodb://localhost:27017';
+        const client = new MongoClient(atlasCS);
         await client.connect();
         return client.db('SnippetsShare');
       },
