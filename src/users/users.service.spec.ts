@@ -7,6 +7,8 @@ import { User } from './entities/user.entity';
 import { GetUser } from './dto/getUser.dto';
 import { UserRoleList } from 'src/resources/entities/userRoleList.entity';
 import { UserStatusList } from 'src/resources/entities/userStatusList.entity';
+import { AddUser } from './dto/addUser.dto';
+import { UpdateFullUser } from './dto/updateFullUser.dto';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -140,34 +142,124 @@ describe('UsersService', () => {
   });
 
   describe('addUser', () => {
-    // it('Test to add a user', async () => {});
+    it('Test to add a user', async () => {
+      let add:AddUser = { userName: 'newUser1', password: 'qs5f41fqs0', eMail: 'newUser1@test.fr'};
+      let res = await service.addUser(add);
+      expect(res).toBeDefined();
+      expect(res.length).toBeGreaterThan(10);
+    });
   });
 
   describe('updateUser', () => {
-    // it('Test to update a user', async () => {});
-    // it('Test to update an unknow id', async () => {});
+    it('Test to update a user', async () => {
+      let toUpdate = userFullList.find(res => res.userName == 'Caroline');
+      let newMail = 'newUser1@test.fr';
+      let up:UpdateFullUser = { userName: toUpdate.userName, eMail: newMail, role: toUpdate.role, status: toUpdate.status};
+      let res:UpdateFullUser = await service.updateUser(toUpdate._id.toString(), up);
+      expect(res).toBeDefined();
+      expect(res.eMail).toBe(newMail);
+      expect(res.userName).toBe(toUpdate.userName);
+    });
+    it('Test to update an unknow id', async () => {
+      let toUpdate = userFullList.find(res => res.userName == 'Caroline');
+      let newMail = 'newUser2@test.fr';
+      let up:UpdateFullUser = { userName: toUpdate.userName, eMail: newMail, role: toUpdate.role, status: toUpdate.status};
+      try {
+        let res:UpdateFullUser = await service.updateUser((new ObjectId()).toString(), up);
+        expect(1).toBe(2);
+      }
+      catch(error) {
+        expect(error).toBeDefined();
+        expect(error).toBeInstanceOf(NotFoundException);
+      }
+    });
   });
 
   describe('updateUser_UserName', () => {
-    // it('Test to update the user uersname', async () => {});
-    // it('Test to update an unknow id', async () => {});
+    it('Test to update the user uersname', async () => {
+      let toUpdate = userFullList.find(res => res.userName == 'Caroline');
+      await service.updateUser_UserName(toUpdate._id.toString(), 'Caroline1');
+      
+      let user:GetUser = await service.getUser(toUpdate._id.toString());
+      expect(user).toBeDefined();
+      expect(user.userName).toBe('Caroline1');
+    });
+    it('Test to update an unknow id', async () => {
+      try {
+        await service.updateUser_UserName((new ObjectId()).toString(), 'titi');
+        expect(1).toBe(2);
+      }
+      catch(error) {
+        expect(error).toBeDefined();
+        expect(error).toBeInstanceOf(NotFoundException);
+      }
+    });
   });
 
   describe('updateUser_Password', () => {
-    // it('Test to update the user password', async () => {});
-    // it('Test to update an unknow id', async () => {});
+    it('Test to update the user password', async () => {
+      let toUpdate = userFullList.find(res => res.userName == 'Caroline');
+      await service.updateUser_Password(toUpdate._id.toString(), 'rereg651e,rher51h');
+    });
+    it('Test to update an unknow id', async () => {
+      try {
+        await service.updateUser_Password((new ObjectId()).toString(), 'rereg651e,rher51h');
+        expect(1).toBe(2);
+      }
+      catch(error) {
+        expect(error).toBeDefined();
+        expect(error).toBeInstanceOf(NotFoundException);
+      }
+    });
   });
 
   describe('updateUser_Status', () => {
-    // it('Test to update the user status', async () => {});
-    // it('Test to update an unknow id', async () => {});
+    it('Test to update the user status', async () => {
+      let toUpdate = userFullList.find(res => res.userName == 'Caroline');
+      await service.updateUser_Status(toUpdate._id.toString(), UserStatusList.Activated);
+      
+      let user:GetUser = await service.getUser(toUpdate._id.toString());
+      expect(user).toBeDefined();
+      expect(user.status).toBe(UserStatusList.Activated);
+    });
+    it('Test to update an unknow id', async () => {
+      try {
+        await service.updateUser_Status((new ObjectId()).toString(), UserStatusList.Activated);
+        expect(1).toBe(2);
+      }
+      catch(error) {
+        expect(error).toBeDefined();
+        expect(error).toBeInstanceOf(NotFoundException);
+      }
+    });
   });
 
   // describe('resetPassword', () => {});
 
   describe('deleteUser', () => {
-    // it('Test to delete a user', async () => {});
-    // it('Test to delete an unknow id', async () => {});
+    it('Test to delete a user', async () => {
+      let toUpdate = userFullList.find(res => res.userName == 'Caroline');
+      await service.deleteUser(toUpdate._id.toString());
+      
+      try {
+        let res = await service.getUser(toUpdate._id.toString());
+        expect(res).toBeNull()
+      }
+      catch(error) {
+        expect(error).toBeDefined();
+        expect(error).toBeInstanceOf(NotFoundException);
+      }
+    });
+    it('Test to delete an unknow id', async () => {
+      try {
+        await service.deleteUser((new ObjectId()).toString());
+        expect(1).toBe(2);
+      }
+      catch(error) {
+        expect(error).toBeDefined();
+        expect(error).toBeInstanceOf(NotFoundException);
+      }
+    });
   });
   
   describe('Without MongoDb Connection',() => {
