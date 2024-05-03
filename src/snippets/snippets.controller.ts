@@ -8,6 +8,8 @@ import { snippetStatusList } from 'src/resources/entities/snippetStatusList.enti
 import { AddSnippet } from './dto/addSnippet.dto';
 import { UpdateSnippet } from './dto/updateSnippet.dto';
 import { NotationValidationPipe } from './entities/snippet_notation.entity';
+import { AddSnippetComment } from './dto/addSnippetComment.dto';
+import { Snippet_comments } from './entities/snippet_comments.entity';
 
 @ApiTags('snippets')
 @Controller('snippets')
@@ -99,15 +101,31 @@ export class SnippetsController {
     return null;
   }
 
-  //addSnippetComment
+  @Post('/:id/addcomment')
+  @ApiOperation({ summary: 'Add a new comment to a snippet'})
+  @ApiParam({ name:'id', description: 'Id of the snippet to update', required: true })
+  @ApiBody({ description:'', required:true, type: AddSnippetComment})
+  @ApiOkResponse({description: 'If insert success, return the full new comment object', type:Snippet_comments})
+  @ApiNotFoundResponse({description: 'If unable to find the snippet Id'})
+  addSnippetComment(@Param('id', new MongoIdValidationPipe()) id:string, @Body('comment', new ValidationPipe({expectedType: AddSnippetComment})) comment:AddSnippetComment) : Promise<Snippet_comments> {
+    return null;
+  }
 
   //deleteSnippetComment
+  @Delete('/:id/comment/:commentId')
+  @ApiOperation({ summary: 'Delete a snippet comment' })
+  @ApiParam({ name:'id', description: 'Id of the snippet to delete', required: true })
+  @ApiParam({ name:'commentId', description: 'Id of the comment to delete', required: true })
+  @HttpCode(204)
+  async deleteSnippetComment(@Param('id', new MongoIdValidationPipe()) id:string, @Param('commentId', new MongoIdValidationPipe()) commentId:string): Promise<void> {
+    // await this.restrictedLabelsService.deleteRestrictedLabel(id);
+  }
   
   @Delete('/:id')
   @ApiOperation({ summary: 'Delete a snippet' })
   @ApiParam({ name:'id', description: 'Id of the snippet to delete', required: true })
   @HttpCode(204)
-  async deleteRestrictedLabel(@Param('id', new MongoIdValidationPipe()) id:string): Promise<void> {
+  async deleteSnippet(@Param('id', new MongoIdValidationPipe()) id:string): Promise<void> {
     // await this.restrictedLabelsService.deleteRestrictedLabel(id);
   }
 }
