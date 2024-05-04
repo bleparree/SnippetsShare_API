@@ -22,7 +22,7 @@ export class SnippetsController {
   @ApiOkResponse({ type: Snippet })
   @ApiNotFoundResponse({ description: 'If unable to find the snippet id' })
   getSnippet(@Param('id', new MongoIdValidationPipe()) id:string) : Promise<Snippet> {
-    return null;
+    return this.snippetsService.getSnippet(id);
   }
 
   @Get()
@@ -35,7 +35,7 @@ export class SnippetsController {
   @ApiQuery({ name:'notation', description: 'Filter snippet of a specific notation (3 filter between 3 and 4)', required: false })
   @ApiQuery({ name:'status', description: 'Filter public or private snippets', required: false })
   @ApiQuery({ name:'authorId', description: 'Filter snippets of a specific author', required: false })
-  @ApiQuery({ name:'limit', description: 'Limit the number of response by (50 by default)', required: false })
+  @ApiQuery({ name:'limit', description: 'Limit the number of response by (50 by default)', required: false,  })
   @ApiQuery({ name:'offset', description: 'Start to grab the response starting to xx', required: false })
   @ApiOkResponse({ type: [GetSnippets] })
   getSnippets(
@@ -43,14 +43,13 @@ export class SnippetsController {
     @Query('codeLabelId') codeLabelId?: string,
     @Query('repositoryLabelId') repositoryLabelId?: string,
     @Query('freeLabels') freeLabels?: string[],
-    @Query('relevance') relevance?: number,
-    @Query('notation') notation?: number,
+    @Query('relevance', new ParseIntPipe({optional: true})) relevance?: number,
+    @Query('notation', new ParseIntPipe({optional: true})) notation?: number,
     @Query('status', new ParseEnumPipe(snippetStatusList, {optional:true})) status?: snippetStatusList,
     @Query('authorId') authorId?: string,
-    @Query('limit') limit?: number, //TODO default Value
-    @Query('offset') offset?: number) : Promise<Array<GetSnippets>> {
-      return null;
-      //TODO Add the limit / offset to the getuser list
+    @Query('limit', new ParseIntPipe({optional: true})) limit: number = 50,
+    @Query('offset', new ParseIntPipe({optional: true})) offset: number = 0) : Promise<Array<GetSnippets>> {
+      return this.snippetsService.getSnippets(limit, offset, search, codeLabelId, repositoryLabelId, freeLabels, relevance, notation, status, authorId);
   }
 
   @Post()
@@ -58,7 +57,7 @@ export class SnippetsController {
   @ApiBody({ required: true, type: AddSnippet} )
   @ApiOkResponse({ description:'Return the generated Id of the new element', type: String })
   addSnippet(@Body(new ValidationPipe({expectedType:AddSnippet})) entity: AddSnippet) : Promise<string> {
-    return null;
+    return this.snippetsService.addSnippet(entity);
   }
 
   @Put('/:id')
@@ -68,7 +67,7 @@ export class SnippetsController {
   @ApiOkResponse({ description:'Return the update object', type: UpdateSnippet })
   @ApiNotFoundResponse({ description: 'If unable to find the snippet id' })
   updateSnippet(@Param('id', new MongoIdValidationPipe()) id:string, @Body(new ValidationPipe({expectedType:UpdateSnippet})) entity: UpdateSnippet) : Promise<UpdateSnippet> {
-    return null;
+    return this.snippetsService.updateSnippet(id, entity);
   }
 
   @Put('/addnote/:id')
@@ -78,7 +77,7 @@ export class SnippetsController {
   @HttpCode(204)
   @ApiNotFoundResponse({ description: 'If unable to find the snippet id' })
   addSnippetNotation(@Param('id', new MongoIdValidationPipe()) id:string, @Query('note', new NotationValidationPipe()) note:number) : Promise<void> {
-    return null;
+    return this.snippetsService.addSnippetNotation(id, note);
   }
 
   @Put('/addrelevance/:id')
@@ -88,7 +87,7 @@ export class SnippetsController {
   @HttpCode(204)
   @ApiNotFoundResponse({ description: 'If unable to find the snippet id' })
   addSnippetRelevance(@Param('id', new MongoIdValidationPipe()) id:string, @Query('relevance', new NotationValidationPipe()) relevance:number) : Promise<void> {
-    return null;
+    return this.snippetsService.addSnippetRelevance(id, relevance);
   }
 
   @Put('/updatestatus/:id')
@@ -98,7 +97,7 @@ export class SnippetsController {
   @HttpCode(204)
   @ApiNotFoundResponse({ description: 'If unable to find the snippet id' })
   updateSnippetStatus(@Param('id', new MongoIdValidationPipe()) id:string, @Query('status', new ParseEnumPipe(snippetStatusList)) status:snippetStatusList) : Promise<void> {
-    return null;
+    return this.snippetsService.updateSnippetStatus(id, status);
   }
 
   @Post('/:id/addcomment')
@@ -108,17 +107,16 @@ export class SnippetsController {
   @ApiOkResponse({description: 'If insert success, return the full new comment object', type:Snippet_comments})
   @ApiNotFoundResponse({description: 'If unable to find the snippet Id'})
   addSnippetComment(@Param('id', new MongoIdValidationPipe()) id:string, @Body('comment', new ValidationPipe({expectedType: AddSnippetComment})) comment:AddSnippetComment) : Promise<Snippet_comments> {
-    return null;
+    return this.snippetsService.addSnippetComment(id, comment);
   }
 
-  //deleteSnippetComment
   @Delete('/:id/comment/:commentId')
   @ApiOperation({ summary: 'Delete a snippet comment' })
   @ApiParam({ name:'id', description: 'Id of the snippet to delete', required: true })
   @ApiParam({ name:'commentId', description: 'Id of the comment to delete', required: true })
   @HttpCode(204)
   async deleteSnippetComment(@Param('id', new MongoIdValidationPipe()) id:string, @Param('commentId', new MongoIdValidationPipe()) commentId:string): Promise<void> {
-    // await this.restrictedLabelsService.deleteRestrictedLabel(id);
+    await this.snippetsService.deleteSnippetComment(id, commentId);
   }
   
   @Delete('/:id')
@@ -126,6 +124,6 @@ export class SnippetsController {
   @ApiParam({ name:'id', description: 'Id of the snippet to delete', required: true })
   @HttpCode(204)
   async deleteSnippet(@Param('id', new MongoIdValidationPipe()) id:string): Promise<void> {
-    // await this.restrictedLabelsService.deleteRestrictedLabel(id);
+    await this.snippetsService.deleteSnippet(id);
   }
 }

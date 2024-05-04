@@ -6,14 +6,16 @@ import { INestApplication, InternalServerErrorException } from '@nestjs/common';
 import { RestrictedLabel } from './entities/restrictedLabel.entity';
 import { addRestrictedLabel } from './dto/addRestrictedLabel.dto';
 import { updateRestrictedLabel } from './dto/updateRestrictedLabel.dto';
+import { ObjectId } from 'mongodb';
 
 describe('RestrictedLabelsController', () => {
   let controller: RestrictedLabelsController;
   let app: INestApplication;
+  const validObjectId:string = new ObjectId().toString();
   let restrictedLabelsService = new RestrictedLabelsService(null);
   const mockRestrictedLabelList: RestrictedLabel[] = [
-    { id: 'erjhn5zr4th2rt', name: 'gerg', type: 'Code'}, 
-    { id: 'erjhn5zze44th2rt', name: 'Tada', type: 'Repository'}
+    { id: new ObjectId().toString(), name: 'gerg', type: 'Code'}, 
+    { id: new ObjectId().toString(), name: 'Tada', type: 'Repository'}
   ];
   let usedRestrictedLabelList: RestrictedLabel[];
 
@@ -109,7 +111,7 @@ describe('RestrictedLabelsController', () => {
   });
 
   describe('updateRestrictedLabel test cases', () => {
-    const returnLabel:updateRestrictedLabel = { id: 'szerhg6514reh981erh', name: 'Test' };
+    const returnLabel:updateRestrictedLabel = { id: new ObjectId().toString(), name: 'Test' };
     const mock = jest.spyOn(restrictedLabelsService, 'updateRestrictedLabel');
     mock.mockImplementation((id:string, name:string) => { 
       return new Promise((resolve, reject) => { 
@@ -152,7 +154,7 @@ describe('RestrictedLabelsController', () => {
     mock.mockImplementation((id:string) => { return new Promise((resolve) => { resolve(); }); });
 
     it('Call with a correct id should return a 204', async () => {
-      await supertest(app.getHttpServer()).delete('/restricted-labels/erg654erg1erg').expect(204);
+      await supertest(app.getHttpServer()).delete('/restricted-labels/' + validObjectId).expect(204);
     });
     it('Call without id should return a 404', async () => {
       await supertest(app.getHttpServer()).delete('/restricted-labels').expect(404);
@@ -164,7 +166,7 @@ describe('RestrictedLabelsController', () => {
       mock500.mockImplementation((id:string) => { 
         throw new InternalServerErrorException('pas content');
       });
-      await supertest(app.getHttpServer()).delete(`/restricted-labels/erg654erg1erg`)
+      await supertest(app.getHttpServer()).delete(`/restricted-labels/` + validObjectId)
         .expect(500).then((res) => {
           expect(res.body.error).toBe('Internal Server Error');
           expect(res.body.message).toBe('pas content')
