@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, ParseEnumPipe, ParseFloatPipe, ParseIntPipe, Post, Put, Query, ValidationPipe } from '@nestjs/common';
 import { SnippetsService } from './snippets.service';
-import { ApiBody, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiBody, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Snippet } from './entities/snippet.entity';
 import { MongoIdValidationPipe } from 'src/resources/pipes/mongoIdValidationPipe.pipe';
 import { GetSnippets } from './dto/getSnippets.dto';
@@ -21,6 +21,7 @@ export class SnippetsController {
   @ApiParam({ name:'id', description: 'Id of the requested snippet', required: true })
   @ApiOkResponse({ type: Snippet })
   @ApiNotFoundResponse({ description: 'If unable to find the snippet id' })
+  @ApiBadRequestResponse({description: 'If id wrongly composed'})
   getSnippet(@Param('id', new MongoIdValidationPipe()) id:string) : Promise<Snippet> {
     return this.snippetsService.getSnippet(id);
   }
@@ -33,11 +34,12 @@ export class SnippetsController {
   @ApiQuery({ name:'freeLabels', description: 'Filter snippet with a list of freeLabels', required: false })
   @ApiQuery({ name:'relevance', description: 'Filter snippet of aspecific relevance (3 filter between 3 and 4)', required: false })
   @ApiQuery({ name:'notation', description: 'Filter snippet of a specific notation (3 filter between 3 and 4)', required: false })
-  @ApiQuery({ name:'status', description: 'Filter public or private snippets', required: false })
+  @ApiQuery({ name:'status', description: 'Filter public or private snippets', required: false, enum: snippetStatusList })
   @ApiQuery({ name:'authorId', description: 'Filter snippets of a specific author', required: false })
   @ApiQuery({ name:'limit', description: 'Limit the number of response by (50 by default)', required: false,  })
   @ApiQuery({ name:'offset', description: 'Start to grab the response starting to xx', required: false })
   @ApiOkResponse({ type: [GetSnippets] })
+  @ApiBadRequestResponse({description: 'If one of the query parameter wrongly composed'})
   getSnippets(
     @Query('search') search?: string, 
     @Query('codeLabelId') codeLabelId?: string,
@@ -56,6 +58,7 @@ export class SnippetsController {
   @ApiOperation({ summary: 'Add a new snippet' })
   @ApiBody({ required: true, type: AddSnippet} )
   @ApiOkResponse({ description:'Return the generated Id of the new element', type: String })
+  @ApiBadRequestResponse({description: 'If entity wrongly composed'})
   addSnippet(@Body(new ValidationPipe({expectedType:AddSnippet})) entity: AddSnippet) : Promise<string> {
     return this.snippetsService.addSnippet(entity);
   }
@@ -66,6 +69,7 @@ export class SnippetsController {
   @ApiBody({ type: UpdateSnippet, required: true })
   @ApiOkResponse({ description:'Return the update object', type: UpdateSnippet })
   @ApiNotFoundResponse({ description: 'If unable to find the snippet id' })
+  @ApiBadRequestResponse({description: 'If id or entity wrongly composed'})
   updateSnippet(@Param('id', new MongoIdValidationPipe()) id:string, @Body(new ValidationPipe({expectedType:UpdateSnippet})) entity: UpdateSnippet) : Promise<UpdateSnippet> {
     return this.snippetsService.updateSnippet(id, entity);
   }
@@ -76,6 +80,7 @@ export class SnippetsController {
   @ApiQuery({ name: 'note', description: 'Notation from 1 to 5', required: true})
   @HttpCode(204)
   @ApiNotFoundResponse({ description: 'If unable to find the snippet id' })
+  @ApiBadRequestResponse({description: 'If id wrongly composed'})
   addSnippetNotation(@Param('id', new MongoIdValidationPipe()) id:string, @Query('note', new NotationValidationPipe()) note:number) : Promise<void> {
     return this.snippetsService.addSnippetNotation(id, note);
   }
@@ -86,6 +91,7 @@ export class SnippetsController {
   @ApiQuery({ name: 'relevance', description: 'Notation from 1 to 5', required: true})
   @HttpCode(204)
   @ApiNotFoundResponse({ description: 'If unable to find the snippet id' })
+  @ApiBadRequestResponse({description: 'If id wrongly composed'})
   addSnippetRelevance(@Param('id', new MongoIdValidationPipe()) id:string, @Query('relevance', new NotationValidationPipe()) relevance:number) : Promise<void> {
     return this.snippetsService.addSnippetRelevance(id, relevance);
   }
@@ -96,6 +102,7 @@ export class SnippetsController {
   @ApiQuery({ name: 'status', description: 'Status (Private or Public)', required: true, enum: snippetStatusList})
   @HttpCode(204)
   @ApiNotFoundResponse({ description: 'If unable to find the snippet id' })
+  @ApiBadRequestResponse({description: 'If id or status wrongly composed'})
   updateSnippetStatus(@Param('id', new MongoIdValidationPipe()) id:string, @Query('status', new ParseEnumPipe(snippetStatusList)) status:snippetStatusList) : Promise<void> {
     return this.snippetsService.updateSnippetStatus(id, status);
   }
@@ -103,10 +110,11 @@ export class SnippetsController {
   @Post('/:id/addcomment')
   @ApiOperation({ summary: 'Add a new comment to a snippet'})
   @ApiParam({ name:'id', description: 'Id of the snippet to update', required: true })
-  @ApiBody({ description:'', required:true, type: AddSnippetComment})
+  @ApiBody({ description:'New comment for the snippet', required:true, type: AddSnippetComment})
   @ApiOkResponse({description: 'If insert success, return the full new comment object', type:Snippet_comments})
   @ApiNotFoundResponse({description: 'If unable to find the snippet Id'})
-  addSnippetComment(@Param('id', new MongoIdValidationPipe()) id:string, @Body('comment', new ValidationPipe({expectedType: AddSnippetComment})) comment:AddSnippetComment) : Promise<Snippet_comments> {
+  @ApiBadRequestResponse({description: 'If id or snippetComment wrongly composed'})
+  addSnippetComment(@Param('id', new MongoIdValidationPipe()) id:string, @Body(new ValidationPipe({expectedType: AddSnippetComment})) comment:AddSnippetComment) : Promise<Snippet_comments> {
     return this.snippetsService.addSnippetComment(id, comment);
   }
 
@@ -115,6 +123,8 @@ export class SnippetsController {
   @ApiParam({ name:'id', description: 'Id of the snippet to delete', required: true })
   @ApiParam({ name:'commentId', description: 'Id of the comment to delete', required: true })
   @HttpCode(204)
+  @ApiNotFoundResponse({description: 'If unable to find the snippet Id or the commentId'})
+  @ApiBadRequestResponse({description: 'If id or commentId wrongly composed'})
   async deleteSnippetComment(@Param('id', new MongoIdValidationPipe()) id:string, @Param('commentId', new MongoIdValidationPipe()) commentId:string): Promise<void> {
     await this.snippetsService.deleteSnippetComment(id, commentId);
   }
@@ -123,6 +133,8 @@ export class SnippetsController {
   @ApiOperation({ summary: 'Delete a snippet' })
   @ApiParam({ name:'id', description: 'Id of the snippet to delete', required: true })
   @HttpCode(204)
+  @ApiNotFoundResponse({description: 'If unable to find the snippet Id'})
+  @ApiBadRequestResponse({description: 'If id wrongly composed'})
   async deleteSnippet(@Param('id', new MongoIdValidationPipe()) id:string): Promise<void> {
     await this.snippetsService.deleteSnippet(id);
   }

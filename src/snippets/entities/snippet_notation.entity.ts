@@ -21,10 +21,10 @@ export class NotationValidationPipe implements PipeTransform {
     transform(value: any, metadata: ArgumentMetadata) {
         try { 
             let v = parseInt(value);
-            if (v < 1 && v > 5) throw new Error();
+            if (v < 1 || v > 5 || isNaN(v) == true) throw new Error();
         }
         catch { throw new BadRequestException(`${value} is not a valid Notation (integer between 1 and 5)`); }
-
+        
         return value;
     }
 }

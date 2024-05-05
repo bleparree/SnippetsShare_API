@@ -4,7 +4,7 @@ import { IsDate, IsNotEmpty, IsOptional, IsString } from "class-validator";
 export class Snippet_comments {
     @ApiProperty({ description:"Comment Id" })
     @IsString()
-    @IsOptional()
+    @IsNotEmpty()
     id:string;
 
     @ApiProperty({ description:"Comment" })
@@ -15,7 +15,7 @@ export class Snippet_comments {
     @ApiProperty({ description:"Author of the comment" })
     @IsString()
     @IsNotEmpty()
-    author:string;
+    authorId:string;
 
     @ApiProperty({ description:"Date of the comment" })
     @IsDate()
