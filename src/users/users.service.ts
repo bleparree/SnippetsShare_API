@@ -9,6 +9,7 @@ import { UpdateFullUser } from './dto/updateFullUser.dto';
 @Injectable()
 export class UsersService {
     constructor(@Inject('MONGO_CLIENT') private readonly db: Db) {}
+    collectionName:string = 'Users'
 
     /**
      * Mongo access to get a specific user
@@ -19,7 +20,7 @@ export class UsersService {
         let filterDocument:Filter<Document> = { _id: new ObjectId(id) };
 
         try {
-            let value: WithId<Document> = await this.db.collection('User').findOne(filterDocument);
+            let value: WithId<Document> = await this.db.collection(this.collectionName).findOne(filterDocument);
             if (!value) throw new NotFoundException('No user can be found for id ' + id);
             
             return new GetUser(value);
@@ -64,10 +65,9 @@ export class UsersService {
         else if (filterArray.length == 1) filterDocument = filterArray[0];
     
         try {
-          let value: WithId<Document>[] = await this.db.collection('User').find(filterDocument).toArray();
+          let value: WithId<Document>[] = await this.db.collection(this.collectionName).find(filterDocument).toArray();
           if (value.length > 0) {
             return value.map(val => {
-                // let ret = new GetUser(); ret.initWithMongoObject(val);
                 return new GetUser(val);
             });
           }
@@ -83,7 +83,7 @@ export class UsersService {
      */
     async addUser(user: AddUser): Promise<string> {
         try {
-            let value:InsertOneResult<Document> = await this.db.collection('User').insertOne(user);
+            let value:InsertOneResult<Document> = await this.db.collection(this.collectionName).insertOne(user);
             if (value.acknowledged) return value.insertedId.toString();
             else throw 'InsertOneResult acknowledged status is false';
           }
@@ -91,14 +91,14 @@ export class UsersService {
     }
 
     /**
-     * Mongo acess to update globaly an existing User
+     * Mongo access to update globaly an existing User
      * @param id The user id to update
      * @param user the updated object
      * @returns the modified object
      */
     async updateUser(id:string, user:UpdateFullUser) : Promise<UpdateFullUser> {
         try {
-            let value:UpdateResult<Document> = await this.db.collection('User').updateOne({ _id: new ObjectId(id) }, { $set: user })
+            let value:UpdateResult<Document> = await this.db.collection(this.collectionName).updateOne({ _id: new ObjectId(id) }, { $set: user })
             if (value.acknowledged && value.matchedCount == 1) {
                 return user;
             }
@@ -117,7 +117,7 @@ export class UsersService {
      */
     async updateUser_UserName(id:string, userName:string) : Promise<void> {
         try {
-            let value:UpdateResult<Document> = await this.db.collection('User').updateOne({ _id: new ObjectId(id) }, { $set: { userName: userName } })
+            let value:UpdateResult<Document> = await this.db.collection(this.collectionName).updateOne({ _id: new ObjectId(id) }, { $set: { userName: userName } })
             if (!(value.acknowledged && value.matchedCount == 1)) {
                 throw new NotFoundException('Cannot find any User to update');
             }
@@ -135,7 +135,7 @@ export class UsersService {
      */
     async updateUser_Password(id:string, password:string) : Promise<void> {
         try {
-            let value:UpdateResult<Document> = await this.db.collection('User').updateOne({ _id: new ObjectId(id) }, { $set: { password: password } })
+            let value:UpdateResult<Document> = await this.db.collection(this.collectionName).updateOne({ _id: new ObjectId(id) }, { $set: { password: password } })
             if (!(value.acknowledged && value.matchedCount == 1)) {
                 throw new NotFoundException('Cannot find any User to update');
             }
@@ -153,7 +153,7 @@ export class UsersService {
      */
     async updateUser_Status(id:string, status:UserStatusList) : Promise<void> {
         try {
-            let value:UpdateResult<Document> = await this.db.collection('User').updateOne({ _id: new ObjectId(id) }, { $set: { status: status } })
+            let value:UpdateResult<Document> = await this.db.collection(this.collectionName).updateOne({ _id: new ObjectId(id) }, { $set: { status: status } })
             if (!(value.acknowledged && value.matchedCount == 1)) {
                 throw new NotFoundException('Cannot find any User to update');
             }
@@ -178,7 +178,7 @@ export class UsersService {
      */
     async deleteUser(id:string) : Promise<void> {
         try {
-            let value:DeleteResult = await this.db.collection('User').deleteOne({ _id: new ObjectId(id) });
+            let value:DeleteResult = await this.db.collection(this.collectionName).deleteOne({ _id: new ObjectId(id) });
             if (!value.acknowledged || value.deletedCount == 0) throw new NotFoundException('Cannot found any User to delete');
         }
         catch (err) { 

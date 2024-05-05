@@ -18,15 +18,15 @@ describe('SnippetsController', () => {
   const validObjectId = new ObjectId().toString();
   const mockSnippetList: Snippet[] = [
     { id: new ObjectId().toString(), name: 'Snippet 1', authorId: new ObjectId().toString(), description: 'desc 1', status: snippetStatusList.Private, 
-      codeLabelId: new ObjectId().toString(), repositoryLabelId: new ObjectId().toString(), freeLabels: ['lab1', 'lab2'], searchKeyword: ['key1', 'key2'], 
+      codeLabelId: new ObjectId().toString(), repositoryLabelId: new ObjectId().toString(), freeLabels: ['lab1', 'lab2'], searchKeywords: ['key1', 'key2'], 
       codeSections: [{ codeSection: 'My code Section', path: './', order: 1, type: 'C#' }], comments: [], 
       relevanceRank: { averageNotation:0, count:0}, solutionNotation: { averageNotation:0, count:0}}
   ];
   const addSnippetObject:AddSnippet = { name: 'Snippet 1', authorId: new ObjectId().toString(), description: 'desc 1', status: snippetStatusList.Private, 
-    codeLabelId: new ObjectId().toString(), repositoryLabelId: new ObjectId().toString(), freeLabels: ['lab1', 'lab2'], searchKeyword: ['key1', 'key2'], 
+    codeLabelId: new ObjectId().toString(), repositoryLabelId: new ObjectId().toString(), freeLabels: ['lab1', 'lab2'], searchKeywords: ['key1', 'key2'], 
     codeSections: [{ codeSection: 'My code Section', path: './', order: 1, type: 'C#' }]};
   const updateSnippetObject:UpdateSnippet = { name: 'Snippet 1', authorId: new ObjectId().toString(), description: 'desc 1', status: snippetStatusList.Private, 
-    codeLabelId: new ObjectId().toString(), repositoryLabelId: new ObjectId().toString(), freeLabels: ['lab1', 'lab2'], searchKeyword: ['key1', 'key2'], 
+    codeLabelId: new ObjectId().toString(), repositoryLabelId: new ObjectId().toString(), freeLabels: ['lab1', 'lab2'], searchKeywords: ['key1', 'key2'], 
     codeSections: [{ codeSection: 'My code Section', path: './', order: 1, type: 'C#' }]};
   const addSnippetCommentObject:AddSnippetComment = { authorId: validObjectId.toString(), comment: 'Tarladidada' };
   const snippetCommentObject:Snippet_comments = { id: validObjectId.toString(), date: new Date(), authorId: validObjectId.toString(), comment: 'Tarladidada' };

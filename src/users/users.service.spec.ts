@@ -32,7 +32,7 @@ describe('UsersService', () => {
     client = new MongoClient(mongod.getUri());
     db = client.db('SnippetsShare');
 
-    await db.collection('User').insertMany(userFullList);
+    await db.collection('Users').insertMany(userFullList);
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -56,8 +56,6 @@ describe('UsersService', () => {
   describe('getUser', () => {
     it('Test to get an existing user', async () => {
       await service.getUser(userFullList[0]._id.toString()).then((res:User) => {
-        // let convert = new GetUser();
-        // convert.initWithMongoObject(userFullList[0])
         expect(res).toStrictEqual(new GetUser(userFullList[0]));
       });
     });

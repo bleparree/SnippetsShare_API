@@ -4,6 +4,7 @@ import { snippetStatusList } from "src/resources/entities/snippetStatusList.enti
 import { Snippet_codeSection } from "./snippet_codeSection.entity";
 import { Snippet_notation } from "./snippet_notation.entity";
 import { Snippet_comments } from "./snippet_comments.entity";
+import { Document, WithId } from "mongodb";
 
 export class Snippet {
     @ApiProperty({ description:"Snippet Unique identifier" })
@@ -44,7 +45,7 @@ export class Snippet {
     @ApiProperty({ description:"List of keyword to optimize the search" })
     @IsArray()
     @IsOptional()
-    searchKeyword:Array<string>;
+    searchKeywords:Array<string>;
 
     @ApiProperty({ description:"List of keyword to optimize the search" })
     @IsDefined()
@@ -68,4 +69,24 @@ export class Snippet {
     @IsArray()
     @IsOptional()
     comments:Array<Snippet_comments>;
+
+    constructor();
+    constructor(fullDbObject:WithId<Document>);
+    constructor(fullDbObject?:WithId<Document>) {
+        if (fullDbObject) {
+            this.id = fullDbObject._id.toString();
+            this.name = fullDbObject.name;
+            this.description = fullDbObject.description;
+            this.codeLabelId = fullDbObject.codeLabelId;
+            this.repositoryLabelId = fullDbObject.repositoryLabelId;
+            this.authorId = fullDbObject.authorId;
+            this.freeLabels = fullDbObject.freeLabels;
+            this.searchKeywords = fullDbObject.searchKeywords;
+            this.solutionNotation = fullDbObject.solutionNotation;
+            this.relevanceRank = fullDbObject.relevanceRank;
+            this.codeSections = fullDbObject.codeSections;
+            this.status = fullDbObject.status;
+            this.comments = fullDbObject.comments;
+        }
+    }
 }
