@@ -14,6 +14,15 @@ export class Snippet_notation {
     @Min(0)
     @IsOptional()
     averageNotation:number;
+
+    constructor();
+    constructor(averageNotation:number, count:number);
+    constructor(averageNotation?:number, count?:number) {
+        if (averageNotation && count) {
+            this.averageNotation = averageNotation;
+            this.count = count;
+        }
+    }
 }
 
 @Injectable()

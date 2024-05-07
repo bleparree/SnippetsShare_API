@@ -1,12 +1,13 @@
 import { HttpException, Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { Db, Document, Filter, ObjectId, WithId } from 'mongodb';
+import { Db, Document, Filter, InsertOneResult, ObjectId, UpdateResult, WithId } from 'mongodb';
 import { Snippet } from './entities/snippet.entity';
 import { snippetStatusList } from 'src/resources/entities/snippetStatusList.entity';
 import { GetSnippets } from './dto/getSnippets.dto';
-import { AddSnippet } from './dto/addSnippet.dto';
+import { AddSnippet, AddSnippetForInsert } from './dto/addSnippet.dto';
 import { UpdateSnippet } from './dto/updateSnippet.dto';
 import { AddSnippetComment } from './dto/addSnippetComment.dto';
 import { Snippet_comments } from './entities/snippet_comments.entity';
+import { Snippet_notation } from './entities/snippet_notation.entity';
 
 @Injectable()
 export class SnippetsService {
@@ -102,7 +103,13 @@ export class SnippetsService {
    * @returns The id of newly created snippet
    */
   async addSnippet(dto: AddSnippet) : Promise<string> {
-    return null;
+    try {
+      let objectToInsert:AddSnippetForInsert = new AddSnippetForInsert(dto);
+      let value:InsertOneResult<Document> = await this.db.collection(this.collectionName).insertOne(objectToInsert);
+      if (value.acknowledged) return value.insertedId.toString();
+      else throw 'InsertOneResult acknowledged status is false';
+    }
+    catch (err) { throw new InternalServerErrorException(err) };
   }
 
   /**
@@ -112,7 +119,17 @@ export class SnippetsService {
    * @returns The modified object
    */
   async updateSnippet(id: string, dto: UpdateSnippet) : Promise<UpdateSnippet> {
-    return null;
+    try {
+      let value:UpdateResult<Document> = await this.db.collection(this.collectionName).updateOne({ _id: new ObjectId(id) }, { $set: dto })
+      if (value.acknowledged && value.matchedCount == 1) {
+          return dto;
+      }
+      else throw new NotFoundException('Cannot find any Snippet to update');
+    }
+    catch (err) { 
+        if (err instanceof HttpException) throw err;
+        else throw new InternalServerErrorException(err); 
+    };
   }
 
   /**
@@ -121,6 +138,20 @@ export class SnippetsService {
    * @param notation Notation of the snippet to add
    */
   async addSnippetNotation(id: string, notation: number) : Promise<void> {
+    try {
+      const snippet:Snippet = await this.getSnippet(id);
+      const oldCount = snippet.solutionNotation.count;
+      const newCount = snippet.solutionNotation.count + 1;
+      const oldNote = snippet.solutionNotation.averageNotation;
+      const newNote = ((oldNote * oldCount) + notation) / (newCount);
+      const newNotation:Snippet_notation = new Snippet_notation(newNote, newCount);
+      const value:UpdateResult<Document> = await this.db.collection(this.collectionName).updateOne({ _id: new ObjectId(id) }, { $set: { 'solutionNotation': newNotation } });
+      if (!(value.acknowledged && value.matchedCount == 1)) throw new NotFoundException('Cannot find any Snippet to update');
+    }
+    catch (err) { 
+        if (err instanceof HttpException) throw err;
+        else throw new InternalServerErrorException(err); 
+    };
   }
 
   /**
@@ -129,7 +160,20 @@ export class SnippetsService {
    * @param relevance Relevance to add
    */
   async addSnippetRelevance(id: string, relevance: number) : Promise<void> {
-
+    try {
+      const snippet:Snippet = await this.getSnippet(id);
+      const oldCount = snippet.relevanceRank.count;
+      const newCount = snippet.relevanceRank.count + 1;
+      const oldNote = snippet.relevanceRank.averageNotation;
+      const newNote = ((oldNote * oldCount) + relevance) / (newCount);
+      const newNotation:Snippet_notation = new Snippet_notation(newNote, newCount);
+      const value:UpdateResult<Document> = await this.db.collection(this.collectionName).updateOne({ _id: new ObjectId(id) }, { $set: { 'relevanceRank': newNotation } });
+      if (!(value.acknowledged && value.matchedCount == 1)) throw new NotFoundException('Cannot find any Snippet to update');
+    }
+    catch (err) { 
+        if (err instanceof HttpException) throw err;
+        else throw new InternalServerErrorException(err); 
+    };
   }
 
   /**
