@@ -1,5 +1,5 @@
 import { HttpException, Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { Db, Document, Filter, InsertOneResult, ObjectId, UpdateResult, WithId } from 'mongodb';
+import { DeleteResult, Document, Filter, InsertOneResult, ObjectId, PullOperator, PushOperator, UpdateResult, WithId } from 'mongodb';
 import { Snippet } from './entities/snippet.entity';
 import { snippetStatusList } from 'src/resources/entities/snippetStatusList.entity';
 import { GetSnippets } from './dto/getSnippets.dto';
@@ -8,10 +8,11 @@ import { UpdateSnippet } from './dto/updateSnippet.dto';
 import { AddSnippetComment } from './dto/addSnippetComment.dto';
 import { Snippet_comments } from './entities/snippet_comments.entity';
 import { Snippet_notation } from './entities/snippet_notation.entity';
+import { MongoDbObject } from 'src/mongodb.module';
 
 @Injectable()
 export class SnippetsService {
-  constructor(@Inject('MONGO_CLIENT') private readonly db: Db) {}
+  constructor(@Inject('MONGO_CLIENT') private readonly mongoDbObject: MongoDbObject) {}
   collectionName:string = 'Snippets'
 
   /**
@@ -23,7 +24,7 @@ export class SnippetsService {
     let filterDocument:Filter<Document> = { _id: new ObjectId(id) };
 
         try {
-            let value: WithId<Document> = await this.db.collection(this.collectionName).findOne(filterDocument);
+            let value: WithId<Document> = await this.mongoDbObject.db().collection(this.collectionName).findOne(filterDocument);
             if (!value) throw new NotFoundException('No Snippet can be found for id ' + id);
             
             return new Snippet(value);
@@ -86,7 +87,7 @@ export class SnippetsService {
     else if (filterArray.length == 1) filterDocument = filterArray[0];
 
     try {
-      let value: WithId<Document>[] = await this.db.collection(this.collectionName).find(filterDocument).limit(limit).skip(offset).toArray();
+      let value: WithId<Document>[] = await this.mongoDbObject.db().collection(this.collectionName).find(filterDocument).limit(limit).skip(offset).toArray();
       if (value.length > 0) {
         return value.map(val => {
             return new Snippet(val);
@@ -105,7 +106,7 @@ export class SnippetsService {
   async addSnippet(dto: AddSnippet) : Promise<string> {
     try {
       let objectToInsert:AddSnippetForInsert = new AddSnippetForInsert(dto);
-      let value:InsertOneResult<Document> = await this.db.collection(this.collectionName).insertOne(objectToInsert);
+      let value:InsertOneResult<Document> = await this.mongoDbObject.db().collection(this.collectionName).insertOne(objectToInsert);
       if (value.acknowledged) return value.insertedId.toString();
       else throw 'InsertOneResult acknowledged status is false';
     }
@@ -120,7 +121,7 @@ export class SnippetsService {
    */
   async updateSnippet(id: string, dto: UpdateSnippet) : Promise<UpdateSnippet> {
     try {
-      let value:UpdateResult<Document> = await this.db.collection(this.collectionName).updateOne({ _id: new ObjectId(id) }, { $set: dto })
+      let value:UpdateResult<Document> = await this.mongoDbObject.db().collection(this.collectionName).updateOne({ _id: new ObjectId(id) }, { $set: dto })
       if (value.acknowledged && value.matchedCount == 1) {
           return dto;
       }
@@ -145,7 +146,7 @@ export class SnippetsService {
       const oldNote = snippet.solutionNotation.averageNotation;
       const newNote = ((oldNote * oldCount) + notation) / (newCount);
       const newNotation:Snippet_notation = new Snippet_notation(newNote, newCount);
-      const value:UpdateResult<Document> = await this.db.collection(this.collectionName).updateOne({ _id: new ObjectId(id) }, { $set: { 'solutionNotation': newNotation } });
+      const value:UpdateResult<Document> = await this.mongoDbObject.db().collection(this.collectionName).updateOne({ _id: new ObjectId(id) }, { $set: { 'solutionNotation': newNotation } });
       if (!(value.acknowledged && value.matchedCount == 1)) throw new NotFoundException('Cannot find any Snippet to update');
     }
     catch (err) { 
@@ -167,7 +168,7 @@ export class SnippetsService {
       const oldNote = snippet.relevanceRank.averageNotation;
       const newNote = ((oldNote * oldCount) + relevance) / (newCount);
       const newNotation:Snippet_notation = new Snippet_notation(newNote, newCount);
-      const value:UpdateResult<Document> = await this.db.collection(this.collectionName).updateOne({ _id: new ObjectId(id) }, { $set: { 'relevanceRank': newNotation } });
+      const value:UpdateResult<Document> = await this.mongoDbObject.db().collection(this.collectionName).updateOne({ _id: new ObjectId(id) }, { $set: { 'relevanceRank': newNotation } });
       if (!(value.acknowledged && value.matchedCount == 1)) throw new NotFoundException('Cannot find any Snippet to update');
     }
     catch (err) { 
@@ -182,7 +183,16 @@ export class SnippetsService {
    * @param status New snippet status
    */
   async updateSnippetStatus(id: string, status: snippetStatusList) : Promise<void> {
-
+    try {
+        let value:UpdateResult<Document> = await this.mongoDbObject.db().collection(this.collectionName).updateOne({ _id: new ObjectId(id) }, { $set: { status: status } })
+        if (!(value.acknowledged && value.matchedCount == 1)) {
+            throw new NotFoundException('Cannot find any User to update');
+        }
+    }
+    catch (err) { 
+        if (err instanceof HttpException) throw err;
+        else throw new InternalServerErrorException(err); 
+    };
   }
 
   /**
@@ -192,7 +202,18 @@ export class SnippetsService {
    * @returns The complete inserted comment object
    */
   async addSnippetComment(id: string, dto: AddSnippetComment) : Promise<Snippet_comments> {
-    return null;
+    try {
+      const newComment:Snippet_comments = new Snippet_comments(dto);
+      const value:UpdateResult<Document> = await this.mongoDbObject.db().collection(this.collectionName).updateOne({ _id: new ObjectId(id) }, { $push: { 'comments': newComment } as unknown as PushOperator<Document> });
+      if (value.acknowledged && value.matchedCount == 1 && value.modifiedCount == 1) {
+        return newComment;
+      }
+      else throw new NotFoundException('Cannot find any Snippet to update');
+    }
+    catch (err) { 
+        if (err instanceof HttpException) throw err;
+        else throw new InternalServerErrorException(err); 
+    };
   }
 
   /**
@@ -201,7 +222,14 @@ export class SnippetsService {
    * @param commentId Id of the comment to delete
    */
   async deleteSnippetComment(id: string, commentId: string) : Promise<void> {
-
+    try {
+      const value:UpdateResult<Document> = await this.mongoDbObject.db().collection(this.collectionName).updateOne({ _id: new ObjectId(id) }, { $pull: { 'comments': { 'id': commentId } } as unknown as PullOperator<Document> });
+      if (!(value.acknowledged && value.matchedCount == 1 && value.modifiedCount == 1)) throw new NotFoundException('Cannot find any Snippet to update');
+    }
+    catch (err) { 
+      if (err instanceof HttpException) throw err;
+      else throw new InternalServerErrorException(err); 
+    };
   }
 
   /**
@@ -209,6 +237,13 @@ export class SnippetsService {
    * @param id Id of the snippet to delete
    */
   async deleteSnippet(id: string) : Promise<void> {
-
+    try {
+        let value:DeleteResult = await this.mongoDbObject.db().collection(this.collectionName).deleteOne({ _id: new ObjectId(id) });
+        if (!value.acknowledged || value.deletedCount == 0) throw new NotFoundException('Cannot found any Snippet to delete');
+    }
+    catch (err) { 
+        if (err instanceof HttpException) throw err;
+        else throw new InternalServerErrorException(err); 
+    };
   }
 }

@@ -1,12 +1,13 @@
 import { HttpException, Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { RestrictedLabel } from './entities/restrictedLabel.entity';
 import { updateRestrictedLabel } from './dto/updateRestrictedLabel.dto';
-import { Db, DeleteResult, Document, Filter, InsertOneResult, ObjectId, UpdateResult, WithId } from 'mongodb';
+import { DeleteResult, Document, Filter, InsertOneResult, ObjectId, UpdateResult, WithId } from 'mongodb';
 import { addRestrictedLabel } from './dto/addRestrictedLabel.dto';
+import { MongoDbObject } from 'src/mongodb.module';
 
 @Injectable()
 export class RestrictedLabelsService {
-  constructor(@Inject('MONGO_CLIENT') private readonly db: Db) {}
+  constructor(@Inject('MONGO_CLIENT') private readonly mongoDbObject: MongoDbObject) {}
 
   /**
    * Mongo access to get all the restricted label or a reduced list filtered by name or type
@@ -24,7 +25,7 @@ export class RestrictedLabelsService {
     else if (name) filterDocument = filterName;
 
     try {
-      let value: WithId<Document>[] = await this.db.collection('RestrictedLabel').find(filterDocument).toArray();
+      let value: WithId<Document>[] = await this.mongoDbObject.db().collection('RestrictedLabel').find(filterDocument).toArray();
       if (value.length > 0) {
         return value.map(val => new RestrictedLabel(val));
       }
@@ -40,7 +41,7 @@ export class RestrictedLabelsService {
    */
   async addRestrictedLabel(addDTO: addRestrictedLabel) : Promise<string> {
     try {
-      let value:InsertOneResult<Document> = await this.db.collection('RestrictedLabel').insertOne(addDTO);
+      let value:InsertOneResult<Document> = await this.mongoDbObject.db().collection('RestrictedLabel').insertOne(addDTO);
       if (value.acknowledged) return value.insertedId.toString();
       else throw 'InsertOneResult acknowledged status is false';
     }
@@ -55,7 +56,7 @@ export class RestrictedLabelsService {
    */
   async updateRestrictedLabel(id:string, name:string) : Promise<updateRestrictedLabel> {
     try {
-      let value:UpdateResult<Document> = await this.db.collection('RestrictedLabel').updateOne({ _id: new ObjectId(id) }, { $set: { name: name }})
+      let value:UpdateResult<Document> = await this.mongoDbObject.db().collection('RestrictedLabel').updateOne({ _id: new ObjectId(id) }, { $set: { name: name }})
       if (value.acknowledged && value.matchedCount == 1) return new updateRestrictedLabel(id, name);
       else throw new NotFoundException('Cannot found any restrictedLabel to update');
     }
@@ -71,7 +72,7 @@ export class RestrictedLabelsService {
    */
   async deleteRestrictedLabel(id:string): Promise<void> {
     try {
-      let value:DeleteResult = await this.db.collection('RestrictedLabel').deleteOne({ _id: new ObjectId(id) });
+      let value:DeleteResult = await this.mongoDbObject.db().collection('RestrictedLabel').deleteOne({ _id: new ObjectId(id) });
       if (!value.acknowledged || value.deletedCount == 0) throw new NotFoundException('Cannot found any restrictedLabel to delete');
     }
     catch (err) { 
