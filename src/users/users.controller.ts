@@ -6,7 +6,7 @@ import { AddUser } from './dto/addUser.dto';
 import { UserStatusList, UserStatusValidationPipe } from 'src/resources/entities/userStatusList.entity';
 import { UserRoleList, UserRoleValidationPipe } from 'src/resources/entities/userRoleList.entity';
 import { GetUser } from './dto/getUser.dto';
-import { MongoIdValidationPipe } from 'src/restricted-labels/entities/restrictedLabel.entity';
+import { MongoIdValidationPipe } from 'src/resources/pipes/mongoIdValidationPipe.pipe';
 
 @ApiTags('Users')
 @Controller('users')

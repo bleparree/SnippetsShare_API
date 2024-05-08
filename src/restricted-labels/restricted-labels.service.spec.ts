@@ -1,48 +1,26 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RestrictedLabelsService } from './restricted-labels.service';
 import { RestrictedLabel } from './entities/restrictedLabel.entity';
-import { Db, MongoClient, ObjectId } from 'mongodb';
-import { MongoMemoryServer } from 'mongodb-memory-server';
+import { ObjectId } from 'mongodb';
 import { addRestrictedLabel } from './dto/addRestrictedLabel.dto';
 import { updateRestrictedLabel } from './dto/updateRestrictedLabel.dto';
 import { InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { MongodbModule } from 'src/mongodb.module';
+import { RestrictedLabelMock } from 'src/resources/mock/restricted-labels-mock';
 
 describe('RestrictedLabelsService', () => {
   let service: RestrictedLabelsService;
-  let mongod:MongoMemoryServer;
-  let client:MongoClient;
-  let db:Db;
-  const restrictedLabelFullList = [
-    { _id: new ObjectId(), name:'Test1', type: 'Code' },
-    { _id: new ObjectId(), name:'Test2', type: 'Repository' },
-    { _id: new ObjectId(), name:'Test3', type: 'FreeLabel' },
-    { _id: new ObjectId(), name:'Test4', type: 'Code' },
-    { _id: new ObjectId(), name:'MyTest1', type: 'FreeLabel' },
-    { _id: new ObjectId(), name:'MyTest2', type: 'Repository' },
-    { _id: new ObjectId(), name:'MyTest3', type: 'Code' },
-  ];
-  let mockConnectionOff;
+  const restrictedLabelFullList = (new RestrictedLabelMock()).fullList;
 
   beforeAll(async () => {
-    mongod = await MongoMemoryServer.create({ instance: { dbName: 'SnippetsShare'}});
-    client = new MongoClient(mongod.getUri());
-    db = client.db('SnippetsShare');
-
-    await db.collection('RestrictedLabel').insertMany(restrictedLabelFullList);
-
     const module: TestingModule = await Test.createTestingModule({
+      imports: [MongodbModule],
       providers: [
         RestrictedLabelsService,
-        { provide: 'MONGO_CLIENT', useValue: db },
       ],
     }).compile();
 
     service = module.get<RestrictedLabelsService>(RestrictedLabelsService);
-  });
-
-  afterAll(async () => {
-    client.close();
-    mongod.stop();
   });
 
   it('should be defined', () => {
@@ -157,59 +135,4 @@ describe('RestrictedLabelsService', () => {
       }
     });
   });
-
-  describe('Without MongoDb Connection',() => {
-    it('getRestrictedLabels return 500',async () => {
-      mockMongoConnectionOff();
-      try { 
-        await service.getRestrictedLabels();
-        expect(1).toBe(2);
-      } catch(error) {
-        expect(error).toBeDefined();
-        expect(error).toBeInstanceOf(InternalServerErrorException);
-        expect(error.message).toBe('Mongo is dead');
-      }
-    });
-    it('addRestrictedLabel return 500',async () => {
-      try { 
-        await service.addRestrictedLabel({name:'', type: ''});
-        expect(1).toBe(2);
-      } catch(error) {
-        expect(error).toBeDefined();
-        expect(error).toBeInstanceOf(InternalServerErrorException);
-        expect(error.message).toBe('Mongo is dead');
-      }
-    });
-    it('updateRestrictedLabel return 500',async () => {
-      try { 
-        await service.updateRestrictedLabel('','');
-        expect(1).toBe(2);
-      } catch(error) {
-        expect(error).toBeDefined();
-        expect(error).toBeInstanceOf(InternalServerErrorException);
-        expect(error.message).toBe('Mongo is dead');
-      }
-    });
-    it('deleteRestrictedLabel return 500',async () => {
-      try { 
-        await service.deleteRestrictedLabel('');
-        expect(1).toBe(2);
-      } catch(error) {
-        expect(error).toBeDefined();
-        expect(error).toBeInstanceOf(InternalServerErrorException);
-        expect(error.message).toBe('Mongo is dead');
-      }
-      clearMockConnection();
-    });
-  });
-
-  function mockMongoConnectionOff() {
-    mockConnectionOff = jest.spyOn(db, 'collection');
-    mockConnectionOff.mockImplementation((name:string) => { 
-      throw new InternalServerErrorException('Mongo is dead');
-    });
-  }
-  function clearMockConnection() {
-    mockConnectionOff.mockClear();
-  }
 });

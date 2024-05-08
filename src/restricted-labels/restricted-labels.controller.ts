@@ -5,6 +5,7 @@ import { updateRestrictedLabel } from './dto/updateRestrictedLabel.dto';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { addRestrictedLabel } from './dto/addRestrictedLabel.dto';
 import { typeList } from 'src/resources/entities/typeList.entity';
+import { MongoIdValidationPipe } from 'src/resources/pipes/mongoIdValidationPipe.pipe';
 
 @ApiTags('RestrictedLabels')
 @Controller('restricted-labels')
@@ -33,7 +34,7 @@ export class RestrictedLabelsController {
   @ApiParam({ name:'id', description: 'Id of the Restricted label to update', required: true })
   @ApiQuery({ name:'name', description: 'Updated name of the Restricted label to update', required: true })
   @ApiOkResponse({ description:'Return the update object', type: updateRestrictedLabel })
-  updateRestrictedLabel(@Param('id') id:string, @Query('name') name: string) : Promise<updateRestrictedLabel> {
+  updateRestrictedLabel(@Param('id', new MongoIdValidationPipe()) id:string, @Query('name') name: string) : Promise<updateRestrictedLabel> {
     if (name == null || name.length == 0) { throw new BadRequestException('Name Parameter is required'); }
     return this.restrictedLabelsService.updateRestrictedLabel(id, name);
   }
@@ -42,7 +43,7 @@ export class RestrictedLabelsController {
   @ApiOperation({ summary: 'Delete a restricted labels (admin only)' })
   @ApiParam({ name:'id', description: 'Id of the Restricted label to delete', required: true })
   @HttpCode(204)
-  async deleteRestrictedLabel(@Param('id') id:string): Promise<void> {
+  async deleteRestrictedLabel(@Param('id', new MongoIdValidationPipe()) id:string): Promise<void> {
     await this.restrictedLabelsService.deleteRestrictedLabel(id);
   }
 }
