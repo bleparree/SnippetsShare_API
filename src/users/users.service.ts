@@ -6,6 +6,7 @@ import { UserStatusList } from 'src/resources/entities/userStatusList.entity';
 import { AddUser } from './dto/addUser.dto';
 import { UpdateFullUser } from './dto/updateFullUser.dto';
 import { MongoDbObject } from 'src/mongodb.module';
+import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
@@ -84,7 +85,8 @@ export class UsersService {
      */
     async addUser(user: AddUser): Promise<string> {
         try {
-            let value:InsertOneResult<Document> = await this.mongoDbObject.db().collection(this.collectionName).insertOne(user);
+            let insertUser:User = new User(user);
+            let value:InsertOneResult<Document> = await this.mongoDbObject.db().collection(this.collectionName).insertOne(insertUser);
             if (value.acknowledged) return value.insertedId.toString();
             else throw 'InsertOneResult acknowledged status is false';
           }

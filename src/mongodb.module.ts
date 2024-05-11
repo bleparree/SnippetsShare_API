@@ -21,7 +21,7 @@ import { SnippetMock } from './resources/mock/snippet-mock';
         }
         else {
           let connectionString = 'mongodb+srv://benoitleparree:FOCpHxSqBpT4BFQl@bleparree-cluster.izzh018.mongodb.net/?retryWrites=true&w=majority&appName=bleparree-cluster';
-          if (process.env.COMPUTERNAME = 'MALBU051') connectionString = 'mongodb://localhost:27017';
+          if (process.env.COMPUTERNAME == 'MALBU051') connectionString = 'mongodb://localhost:27017';
           const client = new MongoClient(connectionString);
           await client.connect();
           return new MongoDbObject(client, dbName);

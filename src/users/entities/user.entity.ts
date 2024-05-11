@@ -2,6 +2,7 @@ import { ApiProperty } from "@nestjs/swagger";
 import { IsEmail, IsEnum, IsNotEmpty, IsString } from "class-validator";
 import { UserRoleList } from "src/resources/entities/userRoleList.entity";
 import { UserStatusList } from "src/resources/entities/userStatusList.entity";
+import { AddUser } from "../dto/addUser.dto";
 
 export class User {
     @ApiProperty({ description:"User Unique identifier" })
@@ -35,4 +36,14 @@ export class User {
     @IsEnum(UserStatusList)
     @IsNotEmpty()
     status:string;
+
+    constructor();
+    constructor(dto:AddUser);
+    constructor(dto?:AddUser){
+        this.userName = dto.userName;
+        this.password = dto.password;
+        this.eMail = dto.eMail;
+        this.role = UserRoleList.User;
+        this.status = UserStatusList.ToActivate;
+    }
 }

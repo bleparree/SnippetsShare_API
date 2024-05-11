@@ -6,7 +6,7 @@ export class SnippetMock {
         { _id: new ObjectId('663b79f193cdf9922e06aa9f'), name: 'Snippet 1', authorId: '663b79f193cdf9922e06aaa2', description: 'desc 1', status: snippetStatusList.Private, 
           codeLabelId: '663b79f193cdf9922e06aaa0', repositoryLabelId: '663b79f193cdf9922e06aaa1', freeLabels: ['lab1', 'lab2'], searchKeywords: ['code', 'Test'], 
           codeSections: [{ codeSection: 'My code Section', path: './', order: 1, type: 'C#' }], comments: [], 
-          relevanceRank: { averageNotation:4.2, count:985}, solutionNotation: { averageNotation:4.2, count:985}},
+          relevanceRank: { averageNotation:4.2, count:4}, solutionNotation: { averageNotation:4.2, count:8}},
         { _id: new ObjectId('663b79f193cdf9922e06aaa6'), name: 'Snippet 2 code', authorId: '663b79f193cdf9922e06aaa3', description: 'desc 2', status: snippetStatusList.Private, 
           codeLabelId: '663b79f193cdf9922e06aaa5', repositoryLabelId: '663b79f193cdf9922e06aaa4', freeLabels: ['lab1', 'lab4'], searchKeywords: ['LIste', 'code'], 
           codeSections: [{ codeSection: 'My code Section', path: './', order: 1, type: 'C#' }], comments: [], 

@@ -90,7 +90,7 @@ export class SnippetsService {
       let value: WithId<Document>[] = await this.mongoDbObject.db().collection(this.collectionName).find(filterDocument).limit(limit).skip(offset).toArray();
       if (value.length > 0) {
         return value.map(val => {
-            return new Snippet(val);
+            return new GetSnippets(val);
         });
       }
       return [];
@@ -141,11 +141,12 @@ export class SnippetsService {
   async addSnippetNotation(id: string, notation: number) : Promise<void> {
     try {
       const snippet:Snippet = await this.getSnippet(id);
-      const oldCount = snippet.solutionNotation.count;
-      const newCount = snippet.solutionNotation.count + 1;
-      const oldNote = snippet.solutionNotation.averageNotation;
-      const newNote = ((oldNote * oldCount) + notation) / (newCount);
-      const newNotation:Snippet_notation = new Snippet_notation(newNote, newCount);
+      const oldCount:number = snippet.solutionNotation.count;
+      const newCount:number = snippet.solutionNotation.count + 1;
+      const oldNote:number = snippet.solutionNotation.averageNotation;
+      let newNote:number = ((oldNote * oldCount) + notation) / newCount;
+      let roundedNote:number = Math.round((newNote + Number.EPSILON) * 100) / 100
+      const newNotation:Snippet_notation = new Snippet_notation(Math.fround(roundedNote), newCount);
       const value:UpdateResult<Document> = await this.mongoDbObject.db().collection(this.collectionName).updateOne({ _id: new ObjectId(id) }, { $set: { 'solutionNotation': newNotation } });
       if (!(value.acknowledged && value.matchedCount == 1)) throw new NotFoundException('Cannot find any Snippet to update');
     }
@@ -167,7 +168,8 @@ export class SnippetsService {
       const newCount = snippet.relevanceRank.count + 1;
       const oldNote = snippet.relevanceRank.averageNotation;
       const newNote = ((oldNote * oldCount) + relevance) / (newCount);
-      const newNotation:Snippet_notation = new Snippet_notation(newNote, newCount);
+      let roundedNote:number = Math.round((newNote + Number.EPSILON) * 100) / 100;
+      const newNotation:Snippet_notation = new Snippet_notation(roundedNote, newCount);
       const value:UpdateResult<Document> = await this.mongoDbObject.db().collection(this.collectionName).updateOne({ _id: new ObjectId(id) }, { $set: { 'relevanceRank': newNotation } });
       if (!(value.acknowledged && value.matchedCount == 1)) throw new NotFoundException('Cannot find any Snippet to update');
     }

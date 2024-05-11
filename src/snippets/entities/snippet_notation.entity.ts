@@ -31,9 +31,9 @@ export class NotationValidationPipe implements PipeTransform {
         try { 
             let v = parseInt(value);
             if (v < 1 || v > 5 || isNaN(v) == true) throw new Error();
+
+            return v;
         }
         catch { throw new BadRequestException(`${value} is not a valid Notation (integer between 1 and 5)`); }
-        
-        return value;
     }
 }
