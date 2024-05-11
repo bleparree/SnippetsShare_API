@@ -9,6 +9,7 @@ import { MongodbModule } from 'src/mongodb.module';
 import { AddSnippet } from './dto/addSnippet.dto';
 import { UpdateSnippet } from './dto/updateSnippet.dto';
 import { AddSnippetComment } from './dto/addSnippetComment.dto';
+import { GetSnippets } from './dto/getSnippets.dto';
 
 describe('SnippetsService', () => {
   let service: SnippetsService;
@@ -49,7 +50,7 @@ describe('SnippetsService', () => {
   describe('getUsers', () => {
     it('Test to get the entire list without filter', async () => {
       let res = await service.getSnippets(50, 0);
-      expect(res).toStrictEqual(mockSnippetList.map(val => new Snippet(val)));
+      expect(res).toStrictEqual(mockSnippetList.map(val => new GetSnippets(val)));
     });
     it('Test to get the list filtered by a name', async () => {
       let searchText = 'snip';
@@ -58,7 +59,7 @@ describe('SnippetsService', () => {
         mockSnippetList.filter(val => val.name.toLocaleLowerCase().indexOf(searchText.toLocaleLowerCase()) >= 0  || 
                                     val.description.toLocaleLowerCase().indexOf(searchText.toLocaleLowerCase()) >= 0 || 
                                     val.searchKeywords.findIndex(v => (v.toLocaleLowerCase().indexOf(searchText.toLocaleLowerCase()) >= 0)) >= 0
-                                  ).map(val => new Snippet(val)));
+                                  ).map(val => new GetSnippets(val)));
     });
     it('Test to get the list filtered by a desc', async () => {
       let searchText = 'desc 1';
@@ -67,7 +68,7 @@ describe('SnippetsService', () => {
         mockSnippetList.filter(val => val.name.toLocaleLowerCase().indexOf(searchText.toLocaleLowerCase()) >= 0  || 
                                     val.description.toLocaleLowerCase().indexOf(searchText.toLocaleLowerCase()) >= 0 || 
                                     val.searchKeywords.findIndex(v => (v.toLocaleLowerCase().indexOf(searchText.toLocaleLowerCase()) >= 0)) >= 0
-                                  ).map(val => new Snippet(val)));
+                                  ).map(val => new GetSnippets(val)));
     });
     it('Test to get the list filtered by a searchKeyword & name', async () => {
       let searchText = 'LIste';
@@ -76,37 +77,37 @@ describe('SnippetsService', () => {
         mockSnippetList.filter(val => val.name.toLocaleLowerCase().indexOf(searchText.toLocaleLowerCase()) >= 0  || 
                                     val.description.toLocaleLowerCase().indexOf(searchText.toLocaleLowerCase()) >= 0 || 
                                     val.searchKeywords.findIndex(v => (v.toLocaleLowerCase().indexOf(searchText.toLocaleLowerCase()) >= 0)) >= 0
-                                  ).map(val => new Snippet(val)));
+                                  ).map(val => new GetSnippets(val)));
     });
     it('Test to get the list filtered by codeLabelId', async () => {
       let res = await service.getSnippets(50, 0, null, mockSnippetList[0].codeLabelId);
-      expect(res).toStrictEqual(mockSnippetList.filter(val => val.codeLabelId == mockSnippetList[0].codeLabelId).map(val => new Snippet(val)));
+      expect(res).toStrictEqual(mockSnippetList.filter(val => val.codeLabelId == mockSnippetList[0].codeLabelId).map(val => new GetSnippets(val)));
     });
     it('Test to get the list filtered by repositoryLabelId', async () => {
       let res = await service.getSnippets(50, 0, null, null, mockSnippetList[0].repositoryLabelId);
-      expect(res).toStrictEqual(mockSnippetList.filter(val => val.repositoryLabelId == mockSnippetList[0].repositoryLabelId).map(val => new Snippet(val)));
+      expect(res).toStrictEqual(mockSnippetList.filter(val => val.repositoryLabelId == mockSnippetList[0].repositoryLabelId).map(val => new GetSnippets(val)));
     });
     it('Test to get the list filtered by freeLabels', async () => {
       let res = await service.getSnippets(50, 0, null, null, null, ['lab1', 'lab4']);
-      expect(res).toStrictEqual(mockSnippetList.filter(val => val.freeLabels.includes('lab1') && val.freeLabels.includes('lab4')).map(val => new Snippet(val)));
+      expect(res).toStrictEqual(mockSnippetList.filter(val => val.freeLabels.includes('lab1') && val.freeLabels.includes('lab4')).map(val => new GetSnippets(val)));
     });
     it('Test to get the list filtered by relevance', async () => {
       let relevance = 4;
       let res = await service.getSnippets(50, 0, null, null, null, null, relevance);
-      expect(res).toStrictEqual(mockSnippetList.filter(val => val.relevanceRank.averageNotation >= relevance && val.relevanceRank.averageNotation < relevance + 1).map(val => new Snippet(val)));
+      expect(res).toStrictEqual(mockSnippetList.filter(val => val.relevanceRank.averageNotation >= relevance && val.relevanceRank.averageNotation < relevance + 1).map(val => new GetSnippets(val)));
     });
     it('Test to get the list filtered by notation', async () => {
       let notation = 2;
       let res = await service.getSnippets(50, 0, null, null, null, null, null, notation);
-      expect(res).toStrictEqual(mockSnippetList.filter(val => val.relevanceRank.averageNotation >= notation && val.relevanceRank.averageNotation < notation + 1).map(val => new Snippet(val)));
+      expect(res).toStrictEqual(mockSnippetList.filter(val => val.relevanceRank.averageNotation >= notation && val.relevanceRank.averageNotation < notation + 1).map(val => new GetSnippets(val)));
     });
     it('Test to get the list filtered by status', async () => {
       let res = await service.getSnippets(50, 0, null, null, null, null, null, null, snippetStatusList.Private);
-      expect(res).toStrictEqual(mockSnippetList.filter(val => val.status == snippetStatusList.Private).map(val => new Snippet(val)));
+      expect(res).toStrictEqual(mockSnippetList.filter(val => val.status == snippetStatusList.Private).map(val => new GetSnippets(val)));
     });
     it('Test to get the list filtered by authorId', async () => {
       let res = await service.getSnippets(50, 0, null, null, null, null, null, null, null, mockSnippetList[0].authorId);
-      expect(res).toStrictEqual(mockSnippetList.filter(val => val.authorId == mockSnippetList[0].authorId).map(val => new Snippet(val)));
+      expect(res).toStrictEqual(mockSnippetList.filter(val => val.authorId == mockSnippetList[0].authorId).map(val => new GetSnippets(val)));
     });
     it('Test to get the list with search=test and status=Private', async () => {
       let searchText = 'test';
@@ -114,7 +115,7 @@ describe('SnippetsService', () => {
       expect(res).toStrictEqual(mockSnippetList.filter(val => (val.name.toLocaleLowerCase().indexOf(searchText.toLocaleLowerCase()) >= 0  || 
         val.description.toLocaleLowerCase().indexOf(searchText.toLocaleLowerCase()) >= 0 || 
         val.searchKeywords.findIndex(v => (v.toLocaleLowerCase().indexOf(searchText.toLocaleLowerCase()) >= 0)) >= 0)
-        && val.status == snippetStatusList.Private).map(val => new Snippet(val)));
+        && val.status == snippetStatusList.Private).map(val => new GetSnippets(val)));
     });
     it('Test to search something who don\'t exist', async () => {
       let searchText = 'something who dont exist';
@@ -191,7 +192,7 @@ describe('SnippetsService', () => {
 
   describe('addSnippetRelevance', () => {
     it('Test to add a relevance to a snippet', async () => {
-      await service.addSnippetRelevance(mockSnippetList[0]._id.toString(), 3);
+      await service.addSnippetRelevance(mockSnippetList[0]._id.toString(), 2);
 
       const res:Snippet = await service.getSnippet(mockSnippetList[0]._id.toString());
       expect(res.id).toBe(mockSnippetList[0]._id.toString());

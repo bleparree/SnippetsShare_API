@@ -55,7 +55,7 @@ export class Snippet {
     @IsDefined()
     solutionNotation:Snippet_notation;
 
-    @ApiProperty({ description:"Code sections of the snippet" })
+    @ApiProperty({ description:"Code sections of the snippet", type: Snippet_codeSection, isArray: true })
     @IsArray()
     @IsDefined()
     codeSections:Array<Snippet_codeSection>;

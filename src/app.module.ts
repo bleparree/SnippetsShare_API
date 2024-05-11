@@ -7,7 +7,7 @@ import { ResourcesModule } from './resources/resources.module';
 import { SnippetsModule } from './snippets/snippets.module';
 
 @Module({
-  imports: [RestrictedLabelsModule, UsersModule, ResourcesModule, SnippetsModule],
+  imports: [SnippetsModule, UsersModule, RestrictedLabelsModule, ResourcesModule],
   controllers: [AppController],
   providers: [AppService],
 })

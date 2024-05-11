@@ -219,19 +219,19 @@ describe('SnippetsController', () => {
       }); 
     });
     it('Call with a correct notation should return a 200', async () => {
-      await supertest(app.getHttpServer()).put(`/snippets/addnote/${validObjectId}?note=4`).expect(204);
+      await supertest(app.getHttpServer()).put(`/snippets/${validObjectId}/addnote?note=4`).expect(204);
     });
     it('Call without id should return a 404', async () => {
       await supertest(app.getHttpServer()).put(`/snippets/addnote/?note=4`).expect(400);
     });
     it('Call with WRONG id should return a 400', async () => {
-      await supertest(app.getHttpServer()).put(`/snippets/addnote/tata?note=4`).expect(400);
+      await supertest(app.getHttpServer()).put(`/snippets/tata/addnote?note=4`).expect(400);
     });
     it('Call without notation should return a 400', async () => {
-      await supertest(app.getHttpServer()).put(`/snippets/addnote/${validObjectId}`).expect(400);
+      await supertest(app.getHttpServer()).put(`/snippets/${validObjectId}/addnote`).expect(400);
     });
     it('Call with WRONG notation should return a 400', async () => {
-      await supertest(app.getHttpServer()).put(`/snippets/addnote/${validObjectId}?note=100`).expect(400);
+      await supertest(app.getHttpServer()).put(`/snippets/${validObjectId}/addnote?note=100`).expect(400);
     });
     mock.mockClear();
   });
@@ -244,19 +244,19 @@ describe('SnippetsController', () => {
       }); 
     });
     it('Call with a correct notation should return a 200', async () => {
-      await supertest(app.getHttpServer()).put(`/snippets/addrelevance/${validObjectId}?relevance=4`).expect(204);
+      await supertest(app.getHttpServer()).put(`/snippets/${validObjectId}/addrelevance?relevance=4`).expect(204);
     });
     it('Call without id should return a 404', async () => {
       await supertest(app.getHttpServer()).put(`/snippets/addrelevance/?relevance=4`).expect(400);
     });
     it('Call with WRONG id should return a 400', async () => {
-      await supertest(app.getHttpServer()).put(`/snippets/addrelevance/tata?relevance=4`).expect(400);
+      await supertest(app.getHttpServer()).put(`/snippets/tata/addrelevance?relevance=4`).expect(400);
     });
     it('Call without notation should return a 400', async () => {
-      await supertest(app.getHttpServer()).put(`/snippets/addrelevance/${validObjectId}`).expect(400);
+      await supertest(app.getHttpServer()).put(`/snippets/${validObjectId}/addrelevance`).expect(400);
     });
     it('Call with WRONG notation should return a 400', async () => {
-      await supertest(app.getHttpServer()).put(`/snippets/addrelevance/${validObjectId}?relevance=100`).expect(400);
+      await supertest(app.getHttpServer()).put(`/snippets/${validObjectId}/addrelevance?relevance=100`).expect(400);
     });
     mock.mockClear();
   });
@@ -269,19 +269,19 @@ describe('SnippetsController', () => {
       }); 
     });
     it('Call with a correct Status should return a 200', async () => {
-      await supertest(app.getHttpServer()).put(`/snippets/updatestatus/${validObjectId}?status=${snippetStatusList.Private}`).expect(204);
+      await supertest(app.getHttpServer()).put(`/snippets/${validObjectId}/updatestatus?status=${snippetStatusList.Private}`).expect(204);
     });
     it('Call without id should return a 400', async () => {
       await supertest(app.getHttpServer()).put(`/snippets/updatestatus/?status=${snippetStatusList.Private}`).expect(400);
     });
     it('Call with WRONG id should return a 400', async () => {
-      await supertest(app.getHttpServer()).put(`/snippets/updatestatus/tata?status=${snippetStatusList.Private}`).expect(400);
+      await supertest(app.getHttpServer()).put(`/snippets/tata/updatestatus?status=${snippetStatusList.Private}`).expect(400);
     });
     it('Call without Status should return a 400', async () => {
-      await supertest(app.getHttpServer()).put(`/snippets/updatestatus/${validObjectId}`).expect(400);
+      await supertest(app.getHttpServer()).put(`/snippets/${validObjectId}/updatestatus`).expect(400);
     });
     it('Call with WRONG Status should return a 400', async () => {
-      await supertest(app.getHttpServer()).put(`/snippets/updatestatus/${validObjectId}?status=titi`).expect(400);
+      await supertest(app.getHttpServer()).put(`/snippets/${validObjectId}/updatestatus?status=titi`).expect(400);
     });
     mock.mockClear();
   });

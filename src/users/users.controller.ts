@@ -1,6 +1,6 @@
-import { BadRequestException, Body, Controller, Delete, Get, HttpCode, Optional, Param, ParseArrayPipe, ParseEnumPipe, Post, Put, Query, ValidationPipe,  } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, HttpCode, Param, ParseEnumPipe, Post, Put, Query, ValidationPipe,  } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { ApiBody, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiBody, ApiNoContentResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { UpdateFullUser } from './dto/updateFullUser.dto';
 import { AddUser } from './dto/addUser.dto';
 import { UserStatusList, UserStatusValidationPipe } from 'src/resources/entities/userStatusList.entity';
@@ -37,8 +37,9 @@ export class UsersController {
 
   @Post()
   @ApiOperation({ summary: 'To create a new user' })
-  @ApiBody({ required: true} )
+  @ApiBody({ required: true, type: AddUser } )
   @ApiOkResponse({ description:'Return the generated Id of the new element', type: String })
+  @ApiBadRequestResponse({description: 'If entity wrongly composed'})
   addUser(@Body(new ValidationPipe({expectedType:AddUser})) user:AddUser) : Promise<string> {
     return this.usersService.addUser(user);
   }
@@ -46,7 +47,7 @@ export class UsersController {
   @Put('/:id')
   @ApiOperation({ summary: 'To fully update a user properties (Admin Only)' })
   @ApiParam({ name:'id', description: 'Id of the user to update', required: true })
-  @ApiBody({ required: true} )
+  @ApiBody({ required: true, type:UpdateFullUser } )
   @ApiOkResponse({ description:'Return the update object', type: UpdateFullUser })
   @ApiNotFoundResponse({ description: 'If unable to find the user id' })
   updateUser(@Param('id', new MongoIdValidationPipe()) id:string, @Body(new ValidationPipe({expectedType:UpdateFullUser})) user:UpdateFullUser) : Promise<UpdateFullUser> {
@@ -58,7 +59,9 @@ export class UsersController {
   @ApiParam({ name:'id', description: 'Id of the user to update', required: true })
   @ApiQuery({ name:'userName', description: 'Username to update', required: true })
   @HttpCode(204)
+  @ApiNoContentResponse()
   @ApiNotFoundResponse({ description: 'If unable to find the user id' })
+  @ApiBadRequestResponse({description: 'If id wrongly composed'})
   updateUser_UserName(@Param('id', new MongoIdValidationPipe()) id:string, @Query('userName') userName:string) : Promise<void> {
     if (userName == null || userName.length == 0) { throw new BadRequestException('userName Parameter is required'); }
     return this.usersService.updateUser_UserName(id, userName);
@@ -69,7 +72,9 @@ export class UsersController {
   @ApiParam({ name:'id', description: 'Id of the user to update', required: true })
   @ApiQuery({ name:'password', description: 'password to update', required: true })
   @HttpCode(204)
+  @ApiNoContentResponse()
   @ApiNotFoundResponse({ description: 'If unable to find the user id' })
+  @ApiBadRequestResponse({description: 'If id wrongly composed'})
   updateUser_Password(@Param('id', new MongoIdValidationPipe()) id:string, @Query('password') password:string) : Promise<void> {
     if (password == null || password.length == 0) { throw new BadRequestException('password Parameter is required'); }
     return this.usersService.updateUser_Password(id, password);
@@ -80,7 +85,9 @@ export class UsersController {
   @ApiParam({ name:'id', description: 'Id of the user to update', required: true })
   @ApiQuery({ name:'status', description: 'status to update', required: true })
   @HttpCode(204)
+  @ApiNoContentResponse()
   @ApiNotFoundResponse({ description: 'If unable to find the user id' })
+  @ApiBadRequestResponse({description: 'If id or status wrongly composed'})
   updateUser_Status(@Param('id', new MongoIdValidationPipe()) id:string, @Query('status', new ParseEnumPipe(UserStatusList)) status:UserStatusList) : Promise<void> {
     if (status == null || status.length == 0) { throw new BadRequestException('status Parameter is required'); }
     return this.usersService.updateUser_Status(id, status);
@@ -90,7 +97,9 @@ export class UsersController {
   @ApiOperation({ summary: 'Reset a User password (send a link to do it by EMail' })
   @ApiParam({ name:'id', description: 'Id of the user to reset the password', required: true })
   @HttpCode(204)
+  @ApiNoContentResponse()
   @ApiNotFoundResponse({ description: 'If unable to find the user id' })
+  @ApiBadRequestResponse({description: 'If id wrongly composed'})
   resetPassword(@Param('id', new MongoIdValidationPipe()) id:string) : Promise<void> {
     return this.usersService.resetPassword(id);
   }
@@ -99,7 +108,9 @@ export class UsersController {
   @ApiOperation({ summary: 'Delete a user' })
   @ApiParam({ name:'id', description: 'Id of the user to delete', required: true })
   @HttpCode(204)
+  @ApiNoContentResponse()
   @ApiNotFoundResponse({ description: 'If unable to find the user id' })
+  @ApiBadRequestResponse({description: 'If id wrongly composed'})
   deleteUser(@Param('id', new MongoIdValidationPipe()) id:string) : Promise<void> {
     return this.usersService.deleteUser(id);
   }
